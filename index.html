@@ -1,9 +1,10 @@
+```html
 <!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafaBoxBD - ড্রাগ ও মিক্সড ফ্রুটস কস্ট ক্যালকুলেটর</title>
+    <title>SafaBoxBD - স্মার্ট ইনভেন্টরি, প্রিমিক্স ও POS ক্যালকুলেটর</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -14,6 +15,7 @@
         body { font-family: 'Hind Siliguri', sans-serif; background-color: #f3f4f6; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
+        .accordion-content { transition: max-height 0.3s ease-in-out, opacity 0.2s ease-in-out; }
     </style>
 </head>
 <body class="pb-24">
@@ -22,10 +24,10 @@
     <header class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white sticky top-0 z-50 shadow-md">
         <div class="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-2 space-x-reverse">
-                <i class="fa-solid font-bold fa-calculator text-2xl text-amber-300"></i>
+                <i class="fa-solid fa-boxes-packing text-2xl text-amber-300"></i>
                 <div>
-                    <h1 class="text-lg font-bold leading-tight">SafaBoxBD ক্যালকুলেটর</h1>
-                    <p class="text-xs text-emerald-100">রিয়েল-টাইম স্টক ও সার্ভার ট্র্যাকার</p>
+                    <h1 class="text-lg font-bold leading-tight">SafaBoxBD ইনভেন্টরি POS</h1>
+                    <p class="text-xs text-emerald-100">রিয়েল-টাইম স্টক, প্রিমিক্স ও প্রফিট ট্র্যাকার</p>
                 </div>
             </div>
             <div class="flex gap-1.5">
@@ -46,58 +48,64 @@
         <!-- Top Overview Dashboard Cards -->
         <div class="grid grid-cols-2 gap-2 mb-3">
             <!-- Total Used Cost -->
-            <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center space-x-3">
-                <div class="p-2.5 bg-emerald-100 text-emerald-600 rounded-lg">
-                    <i class="fa-solid fa-coins text-xl"></i>
+            <div class="bg-white p-2.5 rounded-xl border border-gray-200 shadow-sm flex items-center space-x-2.5">
+                <div class="p-2 bg-emerald-100 text-emerald-600 rounded-lg">
+                    <i class="fa-solid fa-coins text-lg"></i>
                 </div>
                 <div>
-                    <span class="text-xs text-gray-500 font-medium block">উপাদানের মোট খরচ</span>
-                    <span id="dash-total-cost" class="text-lg font-bold text-gray-800">৳ 0.00</span>
+                    <span class="text-[11px] text-gray-500 font-medium block">প্যাকেটের মোট খরচ</span>
+                    <span id="dash-total-cost" class="text-base font-bold text-gray-800">৳ 0.00</span>
                 </div>
             </div>
 
             <!-- Cost Per Packet -->
-            <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center space-x-3">
-                <div class="p-2.5 bg-amber-100 text-amber-600 rounded-lg">
-                    <i class="fa-solid fa-box text-xl"></i>
+            <div class="bg-white p-2.5 rounded-xl border border-gray-200 shadow-sm flex items-center space-x-2.5">
+                <div class="p-2 bg-amber-100 text-amber-600 rounded-lg">
+                    <i class="fa-solid fa-box text-lg"></i>
                 </div>
                 <div>
-                    <span class="text-xs text-gray-500 font-medium block">প্যাকেট প্রতি খরচ</span>
-                    <span id="dash-cost-per-pkt" class="text-lg font-bold text-amber-700">৳ 0.00</span>
+                    <span class="text-[11px] text-gray-500 font-medium block">প্যাকেট প্রতি খরচ</span>
+                    <span id="dash-cost-per-pkt" class="text-base font-bold text-amber-700">৳ 0.00</span>
                 </div>
             </div>
 
-            <!-- Profit Per Packet -->
-            <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center space-x-3">
-                <div class="p-2.5 bg-blue-100 text-blue-600 rounded-lg">
-                    <i class="fa-solid fa-chart-line text-xl"></i>
+            <!-- Bulk Sales Profit -->
+            <div class="bg-white p-2.5 rounded-xl border border-gray-200 shadow-sm flex items-center space-x-2.5">
+                <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                    <i class="fa-solid fa-scale-balanced text-lg"></i>
                 </div>
                 <div>
-                    <span class="text-xs text-gray-500 font-medium block">প্যাকেট প্রতি লাভ</span>
-                    <span id="dash-profit-pkt" class="text-lg font-bold text-blue-700">৳ 0.00</span>
+                    <span class="text-[11px] text-gray-500 font-medium block">বাল্ক বিক্রির লাভ</span>
+                    <span id="dash-bulk-profit" class="text-base font-bold text-blue-700">৳ 0.00</span>
                 </div>
             </div>
 
-            <!-- Total Profit Amount -->
-            <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center space-x-3">
-                <div class="p-2.5 bg-emerald-100 text-emerald-700 rounded-lg">
-                    <i class="fa-solid fa-sack-dollar text-xl"></i>
+            <!-- Auto-Calculated Consumption/Wastage Cost -->
+            <div class="bg-white p-2.5 rounded-xl border border-gray-200 shadow-sm flex items-center space-x-2.5">
+                <div class="p-2 bg-rose-100 text-rose-600 rounded-lg">
+                    <i class="fa-solid fa-utensils text-lg"></i>
                 </div>
                 <div>
-                    <span class="text-xs text-gray-500 font-medium block">সর্বমোট লাভ (মোট)</span>
-                    <span id="dash-total-profit" class="text-lg font-bold text-emerald-700">৳ 0.00</span>
+                    <span class="text-[11px] text-gray-500 font-medium block">ঘাটতি/খাওয়া খরচ</span>
+                    <span id="dash-eat-cost" class="text-base font-bold text-rose-600">৳ 0.00</span>
                 </div>
             </div>
 
-            <!-- Profit Margin % -->
-            <div class="bg-white p-3 col-span-2 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between px-4">
+            <!-- Grand Net Profit Amount -->
+            <div class="bg-white p-3 col-span-2 rounded-xl border border-emerald-200 shadow-sm bg-gradient-to-r from-emerald-50/50 to-teal-50/50 flex items-center justify-between px-4">
                 <div class="flex items-center space-x-3">
-                    <div class="p-2 bg-purple-100 text-purple-600 rounded-lg">
-                        <i class="fa-solid fa-percent text-lg"></i>
+                    <div class="p-2.5 bg-emerald-600 text-white rounded-xl shadow-sm">
+                        <i class="fa-solid fa-sack-dollar text-xl"></i>
                     </div>
-                    <span class="text-xs text-gray-600 font-medium">লাভের শতকরা হার (Margin)</span>
+                    <div>
+                        <span class="text-xs text-gray-600 font-bold block">সর্বমোট নিট ব্যবসায়িক লাভ</span>
+                        <span class="text-[11px] text-gray-400">(প্যাকেট + বাল্ক - খাওয়া/ঘাটতি)</span>
+                    </div>
                 </div>
-                <span id="dash-profit-margin" class="text-lg font-bold text-purple-700">0.00%</span>
+                <div class="text-right">
+                    <span id="dash-grand-profit" class="text-xl font-extrabold text-emerald-700 block">৳ 0.00</span>
+                    <span id="dash-profit-margin" class="text-xs font-bold text-purple-700 block">0.00% Margin</span>
+                </div>
             </div>
         </div>
 
@@ -124,48 +132,59 @@
 
         <!-- Items Header Section -->
         <div class="flex justify-between items-center mb-2 px-1">
-            <h2 class="text-base font-bold text-gray-800">
-                <i class="fa-solid fa-cubes text-emerald-600 mr-1"></i>আইটেম তালিকা (<span id="item-count">১০</span>)
-            </h2>
-            <button onclick="addItem()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm flex items-center space-x-1 transition">
-                <i class="fa-solid fa-plus"></i>
-                <span>আইটেম যোগ করুন</span>
-            </button>
+            <div class="flex items-center space-x-2">
+                <h2 class="text-base font-bold text-gray-800">
+                    <i class="fa-solid fa-cubes text-emerald-600 mr-1"></i>আইটেম তালিকা (<span id="item-count">১০</span>)
+                </h2>
+                <button onclick="toggleAllAccordions()" id="btn-toggle-all" class="text-[11px] bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-2 py-1 rounded-lg transition">
+                    <i class="fa-solid fa-compress-arrows-alt mr-1"></i>সব গুটিয়ে নিন
+                </button>
+            </div>
+            <div class="flex gap-1.5">
+                <button onclick="openBlendModal()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg shadow-sm flex items-center space-x-1 transition">
+                    <i class="fa-solid fa-blender"></i>
+                    <span>আইটেম মিক্সড করুন</span>
+                </button>
+                <button onclick="addItem()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg shadow-sm flex items-center space-x-1 transition">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>যোগ করুন</span>
+                </button>
+            </div>
         </div>
 
-        <!-- Dynamic Items Container -->
-        <div id="items-container" class="space-y-3"></div>
+        <!-- Dynamic Items Accordion Container -->
+        <div id="items-container" class="space-y-2.5"></div>
 
         <!-- Summary Footer Card -->
         <div class="bg-gray-800 text-white p-4 rounded-xl shadow-lg mt-5 mb-6">
             <h3 class="text-sm font-bold text-amber-400 mb-2 border-b border-gray-700 pb-1 flex justify-between">
-                <span>চূড়ান্ত হিসাব বিবরণী</span>
+                <span>চূড়ান্ত হিসাব বিবরণী (Financial Ledger)</span>
                 <i class="fa-solid fa-receipt"></i>
             </h3>
             <div class="text-xs space-y-1.5 text-gray-300">
                 <div class="flex justify-between">
-                    <span>উপাদানের সর্বমোট খরচ:</span>
+                    <span>প্যাকেটে ব্যবহৃত কাঁচামাল খরচ:</span>
                     <span id="sum-items-cost" class="font-bold text-white">৳ 0.00</span>
                 </div>
                 <div class="flex justify-between">
-                    <span>প্যাকেজিং খরচ (মোট):</span>
+                    <span>প্যাকেজিং খরচ:</span>
                     <span id="sum-pkg-cost" class="font-bold text-white">৳ 0.00</span>
                 </div>
-                <div class="flex justify-between border-t border-gray-700 pt-1 text-sm font-semibold text-emerald-400">
-                    <span>সর্বমোট সর্বসাকুল্যে খরচ:</span>
-                    <span id="sum-grand-total">৳ 0.00</span>
+                <div class="flex justify-between text-emerald-300">
+                    <span>ছোট প্যাকেট বিক্রির লাভ:</span>
+                    <span id="sum-packet-profit" class="font-bold">৳ 0.00</span>
                 </div>
-                <div class="flex justify-between text-xs text-amber-300 pt-0.5">
-                    <span>প্যাকেট প্রতি প্রোডাকশন খরচ:</span>
-                    <span id="sum-cost-per-unit" class="font-bold">৳ 0.00</span>
+                <div class="flex justify-between text-blue-300">
+                    <span>বাল্ক/পাইকারি বিক্রির লাভ:</span>
+                    <span id="sum-bulk-profit" class="font-bold">৳ 0.00</span>
                 </div>
-                <div class="flex justify-between text-xs text-emerald-300 pt-0.5 border-t border-gray-700">
-                    <span>সর্বমোট বিক্রয়মূল্য:</span>
-                    <span id="sum-total-sales" class="font-bold">৳ 0.00</span>
+                <div class="flex justify-between text-rose-300 border-t border-gray-700 pt-1">
+                    <span>স্বয়ংক্রিয় ঘাটতি/খাওয়া খরচ (বিয়োগ):</span>
+                    <span id="sum-eat-cost" class="font-bold">- ৳ 0.00</span>
                 </div>
-                <div class="flex justify-between text-sm text-emerald-400 font-bold pt-0.5">
-                    <span>সর্বমোট নিট লাভ:</span>
-                    <span id="sum-total-net-profit">৳ 0.00</span>
+                <div class="flex justify-between text-sm text-emerald-400 font-extrabold border-t border-gray-700 pt-1">
+                    <span>সর্বমোট চুরান্ত নিট লাভ (Net Profit):</span>
+                    <span id="sum-grand-net-profit">৳ 0.00</span>
                 </div>
             </div>
         </div>
@@ -182,6 +201,73 @@
             <button onclick="saveData(true)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center space-x-2 shadow-md transition">
                 <i class="fa-solid fa-cloud-arrow-up"></i>
                 <span>সার্ভারে সেভ করুন</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Stock Merge Modal -->
+    <div id="merge-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 hidden">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-4 shadow-2xl space-y-3">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-sm text-gray-800"><i class="fa-solid fa-scale-unbalanced text-emerald-600 mr-1.5"></i>নতুন স্টক ও গড় দর হিসাব (Merge)</h3>
+                <button onclick="closeMergeModal()" class="text-gray-400 hover:text-gray-600 text-lg">&times;</button>
+            </div>
+            <p class="text-xs text-gray-500">আগের অবশিষ্ট গ্রাম ও নতুন কেনা স্টকের তথ্য বসালে স্বয়ংক্রিয়ভাবে নতুন গড় কেজি দর হিসাব হয়ে যাবে।</p>
+            
+            <div class="space-y-2 text-xs">
+                <div class="bg-gray-50 p-2 rounded-lg border">
+                    <b class="block text-gray-700 mb-1">১. আগের অবশিষ্টাংশ:</b>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="number" id="merge-old-gram" class="border p-1.5 rounded text-center" placeholder="গ্রাম (যেমন: ৫০০)">
+                        <input type="number" id="merge-old-price" class="border p-1.5 rounded text-center" placeholder="কেজি দর (যেমন: ১০০০০)">
+                    </div>
+                </div>
+                <div class="bg-emerald-50 p-2 rounded-lg border border-emerald-100">
+                    <b class="block text-emerald-800 mb-1">২. নতুন কেনা নতুন স্টক:</b>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="number" id="merge-new-gram" class="border p-1.5 rounded text-center" placeholder="গ্রাম (যেমন: ১০০০০)">
+                        <input type="number" id="merge-new-price" class="border p-1.5 rounded text-center" placeholder="কেজি দর (যেমন: ১২০০)">
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="applyStockMerge()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs shadow transition">
+                স্টক মার্জ করুন ও দর আপডেট করুন
+            </button>
+        </div>
+    </div>
+
+    <!-- Multi-Item Blend / Premix Modal -->
+    <div id="blend-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 hidden">
+        <div class="bg-white rounded-2xl w-full max-w-md p-4 shadow-2xl space-y-3 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-sm text-purple-800"><i class="fa-solid fa-blender text-purple-600 mr-1.5"></i>একাধিক আইটেম মিশিয়ে প্রিমিক্স বানাচ্ছে</h3>
+                <button onclick="closeBlendModal()" class="text-gray-400 hover:text-gray-600 text-lg">&times;</button>
+            </div>
+            <p class="text-xs text-gray-500">আইটেম সিলেক্ট করে গ্রাম লিখুন। সিস্টেম কাঁচামালের স্টক বিয়োগ করে নতুন মিক্সড ব্লেন্ড তৈরি করবে।</p>
+
+            <div class="space-y-2 text-xs overflow-y-auto flex-1 pr-1">
+                <div>
+                    <label class="block text-gray-700 font-bold mb-1">নতুন মিক্সড ব্লেন্ডের নাম:</label>
+                    <input type="text" id="blend-name" class="w-full border p-2 rounded-lg font-bold text-purple-900" placeholder="যেমন: বাদাম ও কিসমিস মিক্স">
+                </div>
+
+                <div class="space-y-2 border-t pt-2" id="blend-rows-container">
+                    <!-- Dynamic Blend Selection Rows -->
+                </div>
+
+                <button onclick="addBlendRow()" class="text-xs text-purple-700 font-bold hover:underline flex items-center pt-1">
+                    <i class="fa-solid fa-plus-circle mr-1"></i>আরেকটি উপাদান মিক্স করুন
+                </button>
+            </div>
+
+            <div class="bg-purple-50 p-2.5 rounded-xl border border-purple-100 text-xs space-y-1">
+                <div class="flex justify-between"><span>মোট প্রিমিক্স ওজন:</span><b id="blend-total-gram" class="text-purple-900">0 গ্রাম</b></div>
+                <div class="flex justify-between"><span>গড় প্রিমিক্স কেজি দর:</span><b id="blend-avg-price" class="text-purple-900">৳ 0.00/কেজি</b></div>
+            </div>
+
+            <button onclick="applyBlendMix()" class="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-2 rounded-lg text-xs shadow transition">
+                প্রিমিক্স তৈরি করুন ও স্টক আপডেট করুন
             </button>
         </div>
     </div>
@@ -209,19 +295,22 @@
         const SERVER_ENDPOINT = "https://script.google.com/macros/s/AKfycbzGGzjr6I84BuxNppEcKrlXxjtrvJwx2OtQXUozeq11AkzwZeGORjEYS5L2sPbhB0S-/exec";
 
         const defaultItems = [
-            { name: 'কাঠবাদাম', price: 1320, initial: 275, remaining: 164 },
-            { name: 'কাজুবাদাম', price: 1380, initial: 175, remaining: 0 },
-            { name: 'আখরোট', price: 1000, initial: 260, remaining: 145 },
-            { name: 'চীনাবাদাম', price: 320, initial: 236, remaining: 0 },
-            { name: 'কিসমিস', price: 870, initial: 175, remaining: 0 },
-            { name: 'কুমড়ো বীজ', price: 800, initial: 489, remaining: 273 },
-            { name: 'সূর্যমুখী বীজ', price: 250, initial: 492, remaining: 90 },
-            { name: 'সাদা তিল', price: 235, initial: 203, remaining: 174 },
-            { name: 'খুরমা', price: 240, initial: 840, remaining: 350 },
-            { name: 'কালো জিরা', price: 500, initial: 108, remaining: 80 }
+            { name: 'কাঠবাদাম', price: 1320, stock: 1000, packetGram: 200, bulkGram: 250, bulkPrice: 350, manualEatGram: null, remaining: 450, isMixed: false, isExpanded: false },
+            { name: 'কাজুবাদাম', price: 1380, stock: 1000, packetGram: 175, bulkGram: 0, bulkPrice: 0, manualEatGram: null, remaining: 825, isMixed: false, isExpanded: false },
+            { name: 'আখরোট', price: 1000, stock: 1000, packetGram: 115, bulkGram: 0, bulkPrice: 0, manualEatGram: null, remaining: 885, isMixed: false, isExpanded: false },
+            { name: 'চীনাবাদাম', price: 320, stock: 1000, packetGram: 236, bulkGram: 0, bulkPrice: 0, manualEatGram: null, remaining: 764, isMixed: false, isExpanded: false },
+            { name: 'কিসমিস', price: 870, stock: 1000, packetGram: 175, bulkGram: 0, bulkPrice: 0, manualEatGram: null, remaining: 825, isMixed: false, isExpanded: false },
+            { name: 'কুমড়ো বীজ', price: 800, stock: 1000, packetGram: 216, bulkGram: 0, bulkPrice: 0, manualEatGram: null, remaining: 784, isMixed: false, isExpanded: false },
+            { name: 'সূর্যমুখী বীজ', price: 250, stock: 1000, packetGram: 402, bulkGram: 0, bulkPrice: 0, manualEatGram: null, remaining: 598, isMixed: false, isExpanded: false },
+            { name: 'সাদা তিল', price: 235, stock: 1000, packetGram: 29, bulkGram: 0, bulkPrice: 0, manualEatGram: null, remaining: 971, isMixed: false, isExpanded: false },
+            { name: 'খুরমা', price: 240, stock: 1000, packetGram: 490, bulkGram: 0, bulkPrice: 0, manualEatGram: null, remaining: 510, isMixed: false, isExpanded: false },
+            { name: 'কালো জিরা', price: 500, stock: 1000, packetGram: 28, bulkGram: 0, bulkPrice: 0, manualEatGram: null, remaining: 972, isMixed: false, isExpanded: false }
         ];
 
         let currentItems = [];
+        let activeMergeIndex = null;
+        let blendRows = [];
+        let allExpanded = false;
 
         window.addEventListener('DOMContentLoaded', () => {
             loadStoredData();
@@ -241,43 +330,144 @@
 
             currentItems.forEach((item, index) => {
                 const card = document.createElement('div');
-                card.className = "bg-white p-3 rounded-xl border border-gray-200 shadow-sm";
+                const isMixed = item.isMixed || false;
+                const isExpanded = item.isExpanded || false;
+
+                // Base & Border styling depending on whether it's a blended mixture or raw material
+                const cardBorder = isMixed ? 'border-purple-300 bg-gradient-to-r from-purple-50/40 via-white to-purple-50/20 shadow-purple-100' : 'border-gray-200 bg-white';
+                
+                card.className = `rounded-xl border shadow-sm transition-all duration-200 ${cardBorder}`;
+
                 card.innerHTML = `
-                    <div class="flex justify-between items-center mb-2">
-                        <input type="text" value="${item.name}" oninput="updateItemField(${index}, 'name', this.value)" class="font-bold text-gray-800 text-sm border-b border-dashed border-gray-300 focus:outline-none bg-transparent w-3/5">
-                        <button onclick="removeItem(${index})" class="text-red-400 hover:text-red-600 text-xs p-1"><i class="fa-solid fa-trash-can"></i></button>
+                    <!-- Accordion Collapsible Header Row -->
+                    <div onclick="toggleAccordion(${index})" class="p-3 flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center space-x-2 space-x-reverse flex-1 pr-2">
+                            <i id="accordion-arrow-${index}" class="fa-solid fa-chevron-right text-xs text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-90 text-emerald-600' : ''}"></i>
+                            
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-bold text-gray-800 text-sm">${item.name}</span>
+                                    ${isMixed ? '<span class="text-[10px] bg-purple-100 text-purple-800 font-extrabold px-2 py-0.5 rounded-full border border-purple-200 flex items-center gap-1"><i class="fa-solid fa-blender"></i> মিক্সড প্রিমিক্স</span>' : ''}
+                                </div>
+                                <div class="text-[11px] text-gray-500 flex items-center space-x-3 mt-0.5">
+                                    <span>অবশিষ্ট স্টক: <b class="text-amber-800 font-bold">${item.remaining || 0}গ</b></span>
+                                    <span>•</span>
+                                    <span>কেজি দর: <b class="text-gray-700">৳${item.price || 0}</b></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-1.5" onclick="event.stopPropagation()">
+                            <button onclick="openMergeModal(${index})" class="text-[10px] bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold px-2 py-1 rounded-md border border-emerald-200 transition" title="পুরোনো ও নতুন স্টক মার্জ করুন">
+                                <i class="fa-solid fa-scale-unbalanced mr-0.5"></i>স্টক মার্জ
+                            </button>
+                            <button onclick="removeItem(${index})" class="text-red-400 hover:text-red-600 text-xs p-1" title="মুছে ফেলুন"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-3 gap-2 mb-2">
-                        <div>
-                            <label class="block text-[11px] text-gray-500">কেজি দর (৳)</label>
-                            <input type="number" value="${item.price || ''}" oninput="updateItemField(${index}, 'price', this.value)" class="w-full bg-gray-50 border text-xs rounded-md p-1.5 text-center font-semibold">
+
+                    <!-- Expandable Details Content Panel -->
+                    <div id="accordion-content-${index}" class="${isExpanded ? 'block' : 'hidden'} px-3 pb-3 space-y-2.5 border-t ${isMixed ? 'border-purple-100' : 'border-gray-100'} pt-2.5">
+                        
+                        <!-- Name & Price/Stock Row -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[11px] text-gray-500">আইটেমের নাম</label>
+                                <input type="text" value="${item.name}" oninput="updateItemField(${index}, 'name', this.value)" class="w-full bg-gray-50 border text-xs rounded-md p-1.5 font-bold text-gray-800">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-gray-500">কেজি দর (৳)</label>
+                                <input type="number" value="${item.price || ''}" oninput="updateItemField(${index}, 'price', this.value)" class="w-full bg-gray-50 border text-xs rounded-md p-1.5 text-center font-semibold" placeholder="0">
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-[11px] text-gray-500">নেট গ্রাম (শুরু)</label>
-                            <input type="number" value="${item.initial || ''}" oninput="updateItemField(${index}, 'initial', this.value)" class="w-full bg-gray-50 border text-xs rounded-md p-1.5 text-center">
+
+                        <div class="grid grid-cols-1">
+                            <div>
+                                <label class="block text-[11px] text-gray-500">শুরুর মোট কেনা স্টক (গ্রাম)</label>
+                                <input type="number" value="${item.stock || ''}" oninput="updateItemField(${index}, 'stock', this.value)" class="w-full bg-emerald-50/50 border border-emerald-200 text-xs rounded-md p-1.5 text-center font-bold text-emerald-900" placeholder="1000">
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-[11px] text-gray-500">অবশিষ্ট গ্রাম</label>
-                            <input type="number" value="${item.remaining || ''}" oninput="updateItemField(${index}, 'remaining', this.value)" class="w-full bg-gray-50 border text-xs rounded-md p-1.5 text-center">
+
+                        <!-- Row 2: Packaging Grams & Bulk Sales -->
+                        <div class="grid grid-cols-3 gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100">
+                            <div>
+                                <label class="block text-[10px] text-gray-500">প্যাকেটে ব্যবহৃত (গ্রাম)</label>
+                                <input type="number" value="${item.packetGram || ''}" oninput="updateItemField(${index}, 'packetGram', this.value)" class="w-full bg-white border text-xs rounded-md p-1 text-center font-bold text-emerald-800" placeholder="0">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-gray-500">বাল্ক বিক্রি (গ্রাম)</label>
+                                <input type="number" value="${item.bulkGram || ''}" oninput="updateItemField(${index}, 'bulkGram', this.value)" class="w-full bg-white border text-xs rounded-md p-1 text-center" placeholder="0">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-gray-500">বাল্ক মূল্য (৳)</label>
+                                <input type="number" value="${item.bulkPrice || ''}" oninput="updateItemField(${index}, 'bulkPrice', this.value)" class="w-full bg-white border text-xs rounded-md p-1 text-center font-medium text-blue-700" placeholder="0">
+                            </div>
                         </div>
-                    </div>
-                    <div class="bg-emerald-50/70 p-2 rounded-lg flex justify-between items-center text-xs mt-1 border border-emerald-100">
-                        <div><span class="text-gray-500">ব্যবহৃত: </span><span id="used-gram-${index}" class="font-bold text-emerald-800">0 গ্রাম</span></div>
-                        <div><span class="text-gray-500">খরচ: </span><span id="item-cost-${index}" class="font-bold text-emerald-700">৳ 0.00</span></div>
+
+                        <!-- Row 3: Actual Remaining Stock & Manual/Auto Consumption -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[11px] text-gray-500">মেপে মেলা অবশিষ্টাংশ (গ্রাম)</label>
+                                <input type="number" value="${item.remaining || ''}" oninput="updateItemField(${index}, 'remaining', this.value)" class="w-full bg-amber-50/60 border border-amber-200 text-xs rounded-md p-1.5 text-center font-bold text-amber-900" placeholder="0">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-gray-500">ম্যানুয়াল ঘাটতি (ইচ্ছাধীন)</label>
+                                <input type="number" value="${item.manualEatGram !== null && item.manualEatGram !== undefined ? item.manualEatGram : ''}" oninput="updateItemField(${index}, 'manualEatGram', this.value)" class="w-full bg-gray-50 border text-xs rounded-md p-1.5 text-center text-rose-700" placeholder="অটোম্যাটিক">
+                            </div>
+                        </div>
+
+                        <!-- Auto Calculation Results Bar -->
+                        <div class="bg-emerald-50/80 p-2 rounded-lg text-xs space-y-1 border border-emerald-100">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">হিসাব অনুযায়ী থাকার কথা:</span>
+                                <span id="expected-stock-${index}" class="font-bold text-gray-700">0 গ্রাম</span>
+                            </div>
+                            <div class="flex justify-between border-t border-emerald-200/50 pt-1">
+                                <span class="text-gray-600">অটো ঘাটতি/খাওয়া (Difference):</span>
+                                <span id="auto-eat-${index}" class="font-bold text-rose-600">0 গ্রাম (৳ 0.00)</span>
+                            </div>
+                        </div>
+
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
+        function toggleAccordion(index) {
+            currentItems[index].isExpanded = !currentItems[index].isExpanded;
+            renderItems();
+            calculateAll();
+            localStorage.setItem('safabox_calculator_items', JSON.stringify(currentItems));
+        }
+
+        function toggleAllAccordions() {
+            allExpanded = !allExpanded;
+            currentItems.forEach(item => item.isExpanded = allExpanded);
+            
+            const btn = document.getElementById('btn-toggle-all');
+            if (allExpanded) {
+                btn.innerHTML = `<i class="fa-solid fa-compress-arrows-alt mr-1"></i>সব গুটিয়ে নিন`;
+            } else {
+                btn.innerHTML = `<i class="fa-solid fa-expand-arrows-alt mr-1"></i>সব খুলুন`;
+            }
+
+            renderItems();
+            calculateAll();
+            localStorage.setItem('safabox_calculator_items', JSON.stringify(currentItems));
+        }
+
         function updateItemField(index, field, value) {
-            currentItems[index][field] = field === 'name' ? value : (parseFloat(value) || 0);
+            if (field === 'manualEatGram') {
+                currentItems[index][field] = value === '' ? null : (parseFloat(value) || 0);
+            } else {
+                currentItems[index][field] = field === 'name' ? value : (parseFloat(value) || 0);
+            }
             calculateAll();
             localStorage.setItem('safabox_calculator_items', JSON.stringify(currentItems));
         }
 
         function addItem() {
-            currentItems.push({ name: 'নতুন আইটেম', price: 0, initial: 0, remaining: 0 });
+            currentItems.push({ name: 'নতুন আইটেম', price: 0, stock: 1000, packetGram: 0, bulkGram: 0, bulkPrice: 0, manualEatGram: null, remaining: 1000, isMixed: false, isExpanded: true });
             renderItems();
             calculateAll();
         }
@@ -293,19 +483,45 @@
         let calculatedSummary = {};
 
         function calculateAll() {
-            let totalItemsCost = 0;
+            let totalPacketItemsCost = 0;
+            let totalBulkProfit = 0;
+            let totalPersonalEatCost = 0;
 
             currentItems.forEach((item, index) => {
                 const pricePerKg = parseFloat(item.price) || 0;
-                const initialGrams = parseFloat(item.initial) || 0;
-                const remainingGrams = parseFloat(item.remaining) || 0;
-                const usedGrams = Math.max(0, initialGrams - remainingGrams);
-                const itemCost = (pricePerKg / 1000) * usedGrams;
-                totalItemsCost += itemCost;
+                const totalStock = parseFloat(item.stock) || 0;
+                const packetGram = parseFloat(item.packetGram) || 0;
+                const bulkGram = parseFloat(item.bulkGram) || 0;
+                const bulkPrice = parseFloat(item.bulkPrice) || 0;
+                const remainingGram = parseFloat(item.remaining) || 0;
 
-                if(document.getElementById(`used-gram-${index}`)) {
-                    document.getElementById(`used-gram-${index}`).textContent = `${usedGrams.toFixed(1)} গ্রাম`;
-                    document.getElementById(`item-cost-${index}`).textContent = `৳ ${itemCost.toFixed(2)}`;
+                // Expected Stock = Total Stock - (Packaging Grams + Bulk Grams)
+                const expectedStock = Math.max(0, totalStock - (packetGram + bulkGram));
+
+                // Auto-Calculated Deficit/Consumption = Expected Stock - Actual Remaining
+                const autoCalculatedEatGrams = Math.max(0, expectedStock - remainingGram);
+
+                // Use Manual Override if specified, else use Auto Calculated
+                const finalEatGrams = (item.manualEatGram !== null && item.manualEatGram !== undefined && !isNaN(item.manualEatGram)) 
+                                      ? parseFloat(item.manualEatGram) 
+                                      : autoCalculatedEatGrams;
+
+                // Packaging Cost Calculation
+                const packetItemCost = (pricePerKg / 1000) * packetGram;
+                totalPacketItemsCost += packetItemCost;
+
+                // Bulk Sale Financials
+                const bulkCost = (pricePerKg / 1000) * bulkGram;
+                const bulkProfit = bulkPrice - bulkCost;
+                totalBulkProfit += bulkProfit;
+
+                // Personal Consumption / Deficit Financials
+                const eatCost = (pricePerKg / 1000) * finalEatGrams;
+                totalPersonalEatCost += eatCost;
+
+                if(document.getElementById(`expected-stock-${index}`)) {
+                    document.getElementById(`expected-stock-${index}`).textContent = `${expectedStock.toFixed(1)} গ্রাম`;
+                    document.getElementById(`auto-eat-${index}`).textContent = `${finalEatGrams.toFixed(1)} গ্রাম (৳ ${eatCost.toFixed(2)})`;
                 }
             });
 
@@ -313,48 +529,217 @@
             const packagingCost = parseFloat(document.getElementById('input-packaging').value) || 0;
             const sellingPricePerPkt = parseFloat(document.getElementById('input-selling-price').value) || 0;
 
-            const grandTotalCost = totalItemsCost + packagingCost;
-            const costPerPacket = grandTotalCost / (packets > 0 ? packets : 1);
-            const profitPerPacket = sellingPricePerPkt - costPerPacket;
-            const totalSales = sellingPricePerPkt * packets;
-            const totalNetProfit = totalSales - grandTotalCost;
-            const profitMarginPercent = costPerPacket > 0 ? (profitPerPacket / costPerPacket) * 100 : 0;
+            const grandPacketCost = totalPacketItemsCost + packagingCost;
+            const costPerPacket = grandPacketCost / (packets > 0 ? packets : 1);
+            const packetProfitPerUnit = sellingPricePerPkt - costPerPacket;
+            const totalPacketProfit = packetProfitPerUnit * packets;
+
+            // Grand Business Net Profit = Packet Profit + Bulk Sales Profit - Personal Eat/Deficit Cost
+            const grandNetProfit = totalPacketProfit + totalBulkProfit - totalPersonalEatCost;
+            const profitMarginPercent = costPerPacket > 0 ? (packetProfitPerUnit / costPerPacket) * 100 : 0;
 
             calculatedSummary = {
-                packets, totalCost: grandTotalCost.toFixed(2),
+                packets, totalPacketCost: grandPacketCost.toFixed(2),
                 costPerPacket: costPerPacket.toFixed(2), sellingPrice: sellingPricePerPkt,
-                totalProfit: totalNetProfit.toFixed(2), profitMargin: profitMarginPercent.toFixed(2),
+                packetProfit: totalPacketProfit.toFixed(2),
+                bulkProfit: totalBulkProfit.toFixed(2),
+                eatCost: totalPersonalEatCost.toFixed(2),
+                grandNetProfit: grandNetProfit.toFixed(2),
+                profitMargin: profitMarginPercent.toFixed(2),
                 items: currentItems
             };
 
-            document.getElementById('dash-total-cost').textContent = `৳ ${totalItemsCost.toFixed(2)}`;
+            // Top Dashboard Updates
+            document.getElementById('dash-total-cost').textContent = `৳ ${totalPacketItemsCost.toFixed(2)}`;
             document.getElementById('dash-cost-per-pkt').textContent = `৳ ${costPerPacket.toFixed(2)}`;
-            document.getElementById('dash-profit-pkt').textContent = `৳ ${profitPerPacket.toFixed(2)}`;
-            document.getElementById('dash-total-profit').textContent = `৳ ${totalNetProfit.toFixed(2)}`;
-            document.getElementById('dash-profit-margin').textContent = `${profitMarginPercent.toFixed(2)}%`;
+            document.getElementById('dash-bulk-profit').textContent = `৳ ${totalBulkProfit.toFixed(2)}`;
+            document.getElementById('dash-eat-cost').textContent = `৳ ${totalPersonalEatCost.toFixed(2)}`;
+            
+            const grandProfitElem = document.getElementById('dash-grand-profit');
+            grandProfitElem.textContent = `৳ ${grandNetProfit.toFixed(2)}`;
+            grandProfitElem.className = `text-xl font-extrabold ${grandNetProfit >= 0 ? 'text-emerald-700' : 'text-red-600'}`;
 
-            document.getElementById('sum-items-cost').textContent = `৳ ${totalItemsCost.toFixed(2)}`;
+            document.getElementById('dash-profit-margin').textContent = `${profitMarginPercent.toFixed(2)}% Margin`;
+
+            // Summary Card Updates
+            document.getElementById('sum-items-cost').textContent = `৳ ${totalPacketItemsCost.toFixed(2)}`;
             document.getElementById('sum-pkg-cost').textContent = `৳ ${packagingCost.toFixed(2)}`;
-            document.getElementById('sum-grand-total').textContent = `৳ ${grandTotalCost.toFixed(2)}`;
-            document.getElementById('sum-cost-per-unit').textContent = `৳ ${costPerPacket.toFixed(2)}`;
-            document.getElementById('sum-total-sales').textContent = `৳ ${totalSales.toFixed(2)}`;
-            document.getElementById('sum-total-net-profit').textContent = `৳ ${totalNetProfit.toFixed(2)}`;
+            document.getElementById('sum-packet-profit').textContent = `৳ ${totalPacketProfit.toFixed(2)}`;
+            document.getElementById('sum-bulk-profit').textContent = `৳ ${totalBulkProfit.toFixed(2)}`;
+            document.getElementById('sum-eat-cost').textContent = `- ৳ ${totalPersonalEatCost.toFixed(2)}`;
+            document.getElementById('sum-grand-net-profit').textContent = `৳ ${grandNetProfit.toFixed(2)}`;
+        }
+
+        // Weighted Average Merge Modal
+        function openMergeModal(index) {
+            activeMergeIndex = index;
+            const item = currentItems[index];
+            document.getElementById('merge-old-gram').value = item.remaining || 0;
+            document.getElementById('merge-old-price').value = item.price || 0;
+            document.getElementById('merge-new-gram').value = '';
+            document.getElementById('merge-new-price').value = '';
+            document.getElementById('merge-modal').classList.remove('hidden');
+        }
+
+        function closeMergeModal() {
+            document.getElementById('merge-modal').classList.add('hidden');
+            activeMergeIndex = null;
+        }
+
+        function applyStockMerge() {
+            if (activeMergeIndex === null) return;
+
+            const oldGrams = parseFloat(document.getElementById('merge-old-gram').value) || 0;
+            const oldPrice = parseFloat(document.getElementById('merge-old-price').value) || 0;
+            const newGrams = parseFloat(document.getElementById('merge-new-gram').value) || 0;
+            const newPrice = parseFloat(document.getElementById('merge-new-price').value) || 0;
+
+            const totalGrams = oldGrams + newGrams;
+            if (totalGrams <= 0) {
+                alert('অনুগ্রহ করে সঠিক গ্রাম সংখ্যা লিখুন');
+                return;
+            }
+
+            const totalCost = ((oldGrams / 1000) * oldPrice) + ((newGrams / 1000) * newPrice);
+            const weightedAveragePricePerKg = (totalCost / totalGrams) * 1000;
+
+            currentItems[activeMergeIndex].stock = totalGrams;
+            currentItems[activeMergeIndex].price = parseFloat(weightedAveragePricePerKg.toFixed(2));
+            currentItems[activeMergeIndex].packetGram = 0;
+            currentItems[activeMergeIndex].bulkGram = 0;
+            currentItems[activeMergeIndex].bulkPrice = 0;
+            currentItems[activeMergeIndex].remaining = totalGrams;
+
+            renderItems();
+            calculateAll();
+            saveData(false);
+            closeMergeModal();
+            showToastMsg('নতুন স্টক ও গড় দর সফলভাবে আপডেট করা হয়েছে!');
+        }
+
+        // Multi-Item Blend Modal Logic
+        function openBlendModal() {
+            document.getElementById('blend-name').value = 'মিক্সড ড্রাই ফ্রুটস ব্লেন্ড';
+            blendRows = [{ itemIndex: 0, gram: 200 }, { itemIndex: 1, gram: 200 }];
+            renderBlendRows();
+            document.getElementById('blend-modal').classList.remove('hidden');
+        }
+
+        function closeBlendModal() {
+            document.getElementById('blend-modal').classList.add('hidden');
+        }
+
+        function renderBlendRows() {
+            const container = document.getElementById('blend-rows-container');
+            container.innerHTML = '';
+
+            blendRows.forEach((row, rIndex) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center gap-2";
+                div.innerHTML = `
+                    <select onchange="updateBlendRow(${rIndex}, 'itemIndex', this.value)" class="flex-1 border p-1.5 rounded text-xs">
+                        ${currentItems.map((item, idx) => `<option value="${idx}" ${idx === row.itemIndex ? 'selected' : ''}>${item.name} (৳${item.price}/কেজি)</option>`).join('')}
+                    </select>
+                    <input type="number" value="${row.gram}" oninput="updateBlendRow(${rIndex}, 'gram', this.value)" class="w-24 border p-1.5 rounded text-xs text-center font-bold" placeholder="গ্রাম">
+                    <button onclick="removeBlendRow(${rIndex})" class="text-red-500 p-1"><i class="fa-solid fa-xmark"></i></button>
+                `;
+                container.appendChild(div);
+            });
+
+            calculateBlendSummary();
+        }
+
+        function addBlendRow() {
+            blendRows.push({ itemIndex: 0, gram: 100 });
+            renderBlendRows();
+        }
+
+        function removeBlendRow(index) {
+            if (blendRows.length <= 1) return;
+            blendRows.splice(index, 1);
+            renderBlendRows();
+        }
+
+        function updateBlendRow(rIndex, field, val) {
+            blendRows[rIndex][field] = field === 'itemIndex' ? parseInt(val) : (parseFloat(val) || 0);
+            calculateBlendSummary();
+        }
+
+        let currentBlendResult = { totalGrams: 0, avgPricePerKg: 0 };
+
+        function calculateBlendSummary() {
+            let totalGrams = 0;
+            let totalCost = 0;
+
+            blendRows.forEach(row => {
+                const item = currentItems[row.itemIndex];
+                if (item) {
+                    const pricePerKg = parseFloat(item.price) || 0;
+                    const gram = parseFloat(row.gram) || 0;
+                    totalGrams += gram;
+                    totalCost += (pricePerKg / 1000) * gram;
+                }
+            });
+
+            const avgPricePerKg = totalGrams > 0 ? (totalCost / totalGrams) * 1000 : 0;
+            currentBlendResult = { totalGrams, avgPricePerKg };
+
+            document.getElementById('blend-total-gram').textContent = `${totalGrams.toFixed(1)} গ্রাম`;
+            document.getElementById('blend-avg-price').textContent = `৳ ${avgPricePerKg.toFixed(2)}/কেজি`;
+        }
+
+        function applyBlendMix() {
+            const name = document.getElementById('blend-name').value.trim() || 'মিক্সড প্রিমিক্স ব্লেন্ড';
+            if (currentBlendResult.totalGrams <= 0) {
+                alert('অনুগ্রহ করে উপাদান ও সঠিক গ্রাম নির্বাচন করুন');
+                return;
+            }
+
+            // Deduct blended amounts from parent item stock
+            blendRows.forEach(row => {
+                const parentItem = currentItems[row.itemIndex];
+                if (parentItem) {
+                    const blendGram = parseFloat(row.gram) || 0;
+                    parentItem.stock = Math.max(0, (parseFloat(parentItem.stock) || 0) - blendGram);
+                    parentItem.remaining = Math.max(0, (parseFloat(parentItem.remaining) || 0) - blendGram);
+                }
+            });
+
+            // Add new blended item into item list with isMixed: true flag and expanded state
+            currentItems.push({
+                name: name,
+                price: parseFloat(currentBlendResult.avgPricePerKg.toFixed(2)),
+                stock: currentBlendResult.totalGrams,
+                packetGram: 0,
+                bulkGram: 0,
+                bulkPrice: 0,
+                manualEatGram: null,
+                remaining: currentBlendResult.totalGrams,
+                isMixed: true,
+                isExpanded: true
+            });
+
+            renderItems();
+            calculateAll();
+            saveData(false);
+            closeBlendModal();
+            showToastMsg('প্রিমিক্স সফলভাবে তৈরি হয়েছে এবং নতুন আইটেম হিসেবে মিক্সড মার্কিং সহ স্টক যুক্ত হয়েছে!');
         }
 
         async function saveData(showToast = false) {
             localStorage.setItem('safabox_calculator_items', JSON.stringify(currentItems));
 
             try {
-                showToastMsg("সার্ভারে সেভ হচ্ছে...");
+                if (showToast) showToastMsg("সার্ভারে সেভ হচ্ছে...");
                 await fetch(SERVER_ENDPOINT, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(calculatedSummary)
                 });
-                showToastMsg("সফলভাবে সার্ভারে সেভ হয়েছে!");
+                if (showToast) showToastMsg("সফলভাবে সার্ভারে সেভ হয়েছে!");
             } catch(e) {
-                showToastMsg("সার্ভারে সেভ করা যায়নি!");
+                if (showToast) showToastMsg("সার্ভারে সেভ করা যায়নি!");
             }
         }
 
@@ -365,17 +750,13 @@
             setTimeout(() => toast.classList.add('opacity-0'), 2500);
         }
 
-        async function openHistoryModal() {
+        function openHistoryModal() {
             document.getElementById('history-modal').classList.remove('hidden');
             const content = document.getElementById('history-content');
-
             content.innerHTML = '<p class="text-center text-gray-500 py-4"><i class="fa-solid fa-spinner fa-spin mr-2"></i>সার্ভার থেকে হিস্ট্রি লোড হচ্ছে...</p>';
 
-            try {
-                const res = await fetch(SERVER_ENDPOINT);
-                const data = await res.json();
-
-                if (data.length <= 1) {
+            window.handleHistoryResponse = function(data) {
+                if (!data || data.length <= 1) {
                     content.innerHTML = '<p class="text-center text-gray-500 py-4">কোনো সেভ হিস্ট্রি পাওয়া যায়নি।</p>';
                     return;
                 }
@@ -388,8 +769,16 @@
                     const totalCost = row[2];
                     const costPerPkt = row[3];
                     const sellingPrice = row[4];
-                    const totalProfit = row[5];
-                    const profitMargin = row[6];
+                    const grandProfit = row[5];
+                    
+                    let rawMargin = row[6];
+                    let formattedMargin = '0.00%';
+                    if (rawMargin !== undefined && rawMargin !== null) {
+                        let numMargin = parseFloat(rawMargin);
+                        if (!isNaN(numMargin)) {
+                            formattedMargin = (numMargin < 1 && numMargin > 0 ? (numMargin * 100) : numMargin).toFixed(2) + '%';
+                        }
+                    }
                     
                     let rawItems = row[7];
                     let parsedItems = [];
@@ -403,7 +792,7 @@
                                 <div>
                                     <span class="text-[11px] font-bold text-gray-600 block">📅 ${date}</span>
                                     <div class="text-xs font-bold text-gray-800 mt-0.5">
-                                        মোট খরচ: <span class="text-red-600">৳ ${totalCost}</span> | লাভ: <span class="text-emerald-600">৳ ${totalProfit}</span>
+                                        খরচ: <span class="text-red-600">৳ ${totalCost}</span> | নিট লাভ: <span class="text-emerald-600">৳ ${grandProfit}</span>
                                     </div>
                                 </div>
                                 <div class="text-right flex items-center space-x-1 space-x-reverse">
@@ -412,26 +801,42 @@
                                 </div>
                             </div>
                             
-                            <!-- Detailed Accordion Body -->
                             <div id="details-${i}" class="hidden p-2.5 bg-white text-[11px] space-y-2 border-t border-gray-100">
                                 <div class="grid grid-cols-2 gap-2 text-gray-600 bg-emerald-50/50 p-2 rounded-lg border border-emerald-100">
                                     <div>প্যাকেট প্রতি খরচ: <b>৳ ${costPerPkt}</b></div>
                                     <div>বিক্রি মূল্য: <b>৳ ${sellingPrice}</b></div>
-                                    <div>লাভের হার: <b>${profitMargin}</b></div>
-                                    <div>মোট আয়: <b>৳ ${(parseFloat(sellingPrice)*parseFloat(packets)).toFixed(2)}</b></div>
+                                    <div>লাভের হার: <b class="text-purple-700">${formattedMargin}</b></div>
+                                    <div>চুরান্ত নিট লাভ: <b class="text-emerald-700">৳ ${grandProfit}</b></div>
                                 </div>
                                 
                                 ${parsedItems.length > 0 ? `
                                     <div class="pt-1">
-                                        <b class="text-gray-700 block mb-1">ব্যবহৃত উপাদানের তালিকা:</b>
+                                        <b class="text-gray-700 block mb-1">ইনভেন্টরি ও কাঁচামালের বিশদ ব্রেকডাউন:</b>
                                         <div class="space-y-1">
                                             ${parsedItems.map(item => {
-                                                const used = Math.max(0, (parseFloat(item.initial)||0) - (parseFloat(item.remaining)||0));
-                                                const cost = ((parseFloat(item.price)||0)/1000) * used;
+                                                const pricePerKg = parseFloat(item.price) || 0;
+                                                const totalStock = parseFloat(item.stock) || 0;
+                                                const packetGram = parseFloat(item.packetGram) || 0;
+                                                const bulkGram = parseFloat(item.bulkGram) || 0;
+                                                const remainingGram = parseFloat(item.remaining) || 0;
+                                                const expected = Math.max(0, totalStock - (packetGram + bulkGram));
+                                                const autoEat = Math.max(0, expected - remainingGram);
+                                                const cost = (pricePerKg / 1000) * packetGram;
+                                                const isMixed = item.isMixed || false;
+
                                                 return `
-                                                    <div class="flex justify-between text-gray-600 border-b border-dashed border-gray-100 pb-0.5">
-                                                        <span>• ${item.name} (${used.toFixed(1)} গ্রাম)</span>
-                                                        <span class="font-semibold text-gray-800">৳ ${cost.toFixed(2)}</span>
+                                                    <div class="border-b border-dashed border-gray-100 pb-1">
+                                                        <div class="flex justify-between font-semibold text-gray-800">
+                                                            <span>• ${item.name} ${isMixed ? '<span class="text-[9px] bg-purple-100 text-purple-800 font-bold px-1 rounded">믹스ড</span>' : ''} <span class="text-[10px] font-normal text-gray-500">(@ ৳${pricePerKg}/কেজি)</span></span>
+                                                            <span>৳ ${cost.toFixed(2)}</span>
+                                                        </div>
+                                                        <div class="text-[10px] text-gray-500 space-x-1 pl-2">
+                                                            <span>স্টক: ${totalStock}গ</span> |
+                                                            <span>প্যাকেটে: ${packetGram}গ</span> |
+                                                            ${bulkGram > 0 ? `<span class="text-blue-600">বাল্ক: ${bulkGram}গ</span> |` : ''}
+                                                            ${autoEat > 0 ? `<span class="text-rose-600">অটো ঘাটতি: ${autoEat.toFixed(1)}গ</span> |` : ''}
+                                                            <span>অবশিষ্ট: ${remainingGram}গ</span>
+                                                        </div>
                                                     </div>
                                                 `;
                                             }).join('')}
@@ -443,9 +848,14 @@
                     `;
                 }
                 content.innerHTML = html;
-            } catch(e) {
+            };
+
+            const script = document.createElement('script');
+            script.src = `${SERVER_ENDPOINT}?callback=handleHistoryResponse&t=${Date.now()}`;
+            script.onerror = function() {
                 content.innerHTML = '<p class="text-center text-red-500 py-4">হিস্ট্রি ডাটা লোড করতে সমস্যা হয়েছে!</p>';
-            }
+            };
+            document.body.appendChild(script);
         }
 
         function toggleHistoryDetails(index) {
@@ -472,3 +882,4 @@
     </script>
 </body>
 </html>
+```
