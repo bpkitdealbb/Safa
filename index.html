@@ -95,7 +95,7 @@
                         <i class="fa-solid fa-sack-dollar text-xl"></i>
                     </div>
                     <div>
-                        <span class="text-xs text-gray-600 font-bold block">সর্বমোট নিট ব্যবসায়িক লাভ</span>
+                        <span class="text-xs text-gray-600 font-bold block">রানিং ব্যাচের নিট লাভ</span>
                         <span class="text-[11px] text-gray-400">(প্যাকেট + বাল্ক - খাওয়া/ঘাটতি)</span>
                     </div>
                 </div>
@@ -154,7 +154,7 @@
         <!-- Summary Footer Card -->
         <div class="bg-gray-800 text-white p-4 rounded-xl shadow-lg mt-5 mb-6">
             <h3 class="text-sm font-bold text-amber-400 mb-2 border-b border-gray-700 pb-1 flex justify-between">
-                <span>চূড়ান্ত হিসাব বিবরণী (Financial Ledger)</span>
+                <span>রানিং ব্যাচ হিসাব বিবরণী (Current Batch Ledger)</span>
                 <i class="fa-solid fa-receipt"></i>
             </h3>
             <div class="text-xs space-y-1.5 text-gray-300">
@@ -179,7 +179,7 @@
                     <span id="sum-eat-cost" class="font-bold">- ৳ 0.00</span>
                 </div>
                 <div class="flex justify-between text-sm text-emerald-400 font-extrabold border-t border-gray-700 pt-1">
-                    <span>সর্বমোট চুরান্ত নিট লাভ (Net Profit):</span>
+                    <span>রানিং ব্যাচ নিট লাভ:</span>
                     <span id="sum-grand-net-profit">৳ 0.00</span>
                 </div>
             </div>
@@ -201,13 +201,13 @@
         </div>
     </div>
 
-    <!-- ONE-LOOK LIFETIME BUSINESS SUMMARY MODAL -->
+    <!-- ONE-LOOK LIFETIME BUSINESS SUMMARY MODAL WITH BATCH PROFITS BREAKDOWN -->
     <div id="report-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-2.5 hidden">
         <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
             <div class="p-3.5 bg-gradient-to-r from-indigo-700 to-purple-800 text-white flex justify-between items-center">
                 <div>
-                    <h3 class="font-bold text-sm flex items-center gap-1.5"><i class="fa-solid fa-chart-line text-amber-300"></i>বিজনেসের লাইফটাইম সামারি ও বর্তমান স্টক ভ্যালু</h3>
-                    <p class="text-[10px] text-indigo-100">প্রোডাক্টের বর্তমান স্টক মূল্য, খরচ, ব্যবহার, ঘাটতি ও সার্বমোট ভ্যালুয়েশন</p>
+                    <h3 class="font-bold text-sm flex items-center gap-1.5"><i class="fa-solid fa-chart-line text-amber-300"></i>বিজনেসের লাইফটাইম সামারি ও ব্যাচভিত্তিক লাভ</h3>
+                    <p class="text-[10px] text-indigo-100">প্রতিটি ব্যাচের আলাদা লাভ এবং সকল ব্যাচের মোট লাইফটাইম নিট লাভ</p>
                 </div>
                 <button onclick="closeFullBusinessReport()" class="text-white hover:text-gray-200 text-xl font-bold">&times;</button>
             </div>
@@ -220,6 +220,17 @@
                         <span class="text-[10px] text-emerald-100">(বর্তমান অবশিষ্ট স্টক × কেজি দর)</span>
                     </div>
                     <span id="grand-stock-valuation" class="text-xl font-extrabold text-amber-300">৳ 0.00</span>
+                </div>
+
+                <!-- Batch-Wise Profit Breakdown Section -->
+                <div class="bg-indigo-50/70 p-3 rounded-xl border border-indigo-200 space-y-2">
+                    <h4 class="font-bold text-indigo-900 flex items-center justify-between border-b border-indigo-200 pb-1">
+                        <span><i class="fa-solid fa-layer-group text-indigo-600 mr-1.5"></i>প্রতিটি ব্যাচের আলাদা লাভ (Batch-wise Profits)</span>
+                        <span id="total-batch-count" class="bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-full">০টি ব্যাচ</span>
+                    </h4>
+                    <div id="batch-profits-container" class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                        <p class="text-gray-500 text-center py-2">হিস্ট্রি থেকে ব্যাচভিত্তিক লাভ লোড হচ্ছে...</p>
+                    </div>
                 </div>
 
                 <!-- Summary Table -->
@@ -243,7 +254,7 @@
                 <!-- Grand Summary Cards -->
                 <div class="bg-gradient-to-r from-gray-800 to-indigo-900 text-white p-3.5 rounded-xl space-y-2.5 shadow">
                     <h4 class="font-bold text-amber-400 border-b border-indigo-700/50 pb-1 flex justify-between">
-                        <span>সার্বমোট বিজনেসের গ্র্যান্ড লেজার সামারি ও লাভ</span>
+                        <span>সার্বমোট বিজনেসের গ্র্যান্ড লেজার সামারি ও লাইফটাইম লাভ</span>
                         <i class="fa-solid fa-coins"></i>
                     </h4>
                     <div class="grid grid-cols-2 gap-2 text-[11px]">
@@ -252,7 +263,7 @@
                         <div>সর্বমোট কাঁচামাল খরচ: <b id="rep-grand-cost" class="text-rose-300">৳ 0.00</b></div>
                         <div>সর্বমোট ঘাটতি/খাওয়া খরচ: <b id="rep-grand-eat" class="text-orange-300">৳ 0.00</b></div>
                         <div>বর্তমান লাইভ অবশিষ্টাংশ: <b id="rep-grand-rem" class="text-amber-300">0 g</b></div>
-                        <div>লাইফটাইম নিট লাভ (Net Profit): <b id="rep-grand-net-profit" class="text-emerald-400">৳ 0.00</b></div>
+                        <div>সকল ব্যাচের মোট লাইফটাইম নিট লাভ: <b id="rep-grand-net-profit" class="text-emerald-400 text-sm">৳ 0.00</b></div>
                     </div>
                 </div>
             </div>
@@ -334,7 +345,7 @@
     <div id="history-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 hidden">
         <div class="bg-white rounded-2xl w-full max-w-lg max-h-[85vh] flex flex-col shadow-2xl">
             <div class="p-3.5 bg-emerald-700 text-white rounded-t-2xl flex justify-between items-center">
-                <h3 class="font-bold text-sm"><i class="fa-solid fa-clock-rotate-left mr-1.5"></i>সার্ভার সেভ হিস্ট্রি</h3>
+                <h3 class="font-bold text-sm"><i class="fa-solid fa-clock-rotate-left mr-1.5"></i>সার্ভার সেভ হিস্ট্রি ও ব্যাচ লাভ</h3>
                 <button onclick="closeHistoryModal()" class="text-white hover:text-gray-200 text-lg">&times;</button>
             </div>
             <div id="history-content" class="p-3 overflow-y-auto flex-1 text-xs space-y-2.5">
@@ -369,10 +380,24 @@
         let activeMergeIndex = null;
         let blendRows = [];
         let allExpanded = false;
+        let globalBatchesHistory = []; // সার্ভার থেকে পাওয়া সব ব্যাচের হিস্ট্রি
 
         window.addEventListener('DOMContentLoaded', () => {
+            loadSavedBatchInputs();
             fetchServerLatestDataAndLoad();
         });
+
+        function loadSavedBatchInputs() {
+            const savedBatch = localStorage.getItem('safabox_last_batch_params');
+            if (savedBatch) {
+                try {
+                    const params = JSON.parse(savedBatch);
+                    if (params.packets) document.getElementById('input-packets').value = params.packets;
+                    if (params.packaging !== undefined) document.getElementById('input-packaging').value = params.packaging;
+                    if (params.sellingPrice) document.getElementById('input-selling-price').value = params.sellingPrice;
+                } catch(e) {}
+            }
+        }
 
         function fetchServerLatestDataAndLoad() {
             const savedItems = localStorage.getItem('safabox_calculator_items');
@@ -380,6 +405,18 @@
             
             window.handleServerSyncResponse = function(data) {
                 if (data && data.length > 1) {
+                    globalBatchesHistory = [];
+                    for (let i = 1; i < data.length; i++) {
+                        globalBatchesHistory.push({
+                            date: data[i][0],
+                            packets: data[i][1],
+                            totalCost: data[i][2],
+                            costPerPkt: data[i][3],
+                            sellingPrice: data[i][4],
+                            grandProfit: parseFloat(data[i][5]) || 0
+                        });
+                    }
+
                     const latestRow = data[data.length - 1];
                     const rawItems = latestRow[7];
                     try {
@@ -403,19 +440,13 @@
 
         function processAndRenderItems() {
             currentItems.forEach(item => {
-                // ১. শুরু ওজন (startWeight) সুরক্ষিত রাখা
                 if (item.startWeight === undefined || item.startWeight === null) {
                     item.startWeight = item.stock || 1000;
                 }
-
-                // ২. অবশিষ্ট স্টক না থাকলে শুরুর স্টকের সমান ধরা হবে
                 if (item.remaining === undefined || item.remaining === null) {
                     item.remaining = item.startWeight;
                 }
-
                 item.endWeight = item.remaining;
-
-                // ৩. প্যাকেটে ব্যবহৃত গ্রাম স্বয়ংক্রিয় হিসাব (শুরু - অবশিষ্ট)
                 const calcPkt = Math.max(0, item.startWeight - item.remaining);
                 if (item.packetGram === undefined || item.packetGram === null) {
                     item.packetGram = calcPkt;
@@ -610,7 +641,6 @@
                              ? parseFloat(item.remaining) 
                              : startG;
 
-                // মোট ব্যবহার হিসাব
                 let totalUsedG = Math.max(0, startG - remG);
                 const extraPkt = parseFloat(item.packetGram) || 0;
                 const extraBulk = parseFloat(item.bulkGram) || 0;
@@ -618,19 +648,19 @@
                     totalUsedG = Math.max(totalUsedG, extraPkt + extraBulk);
                 }
 
-                // ঘাটতি বা খাওয়া হিসাব
                 const expectedStock = Math.max(0, startG - (extraPkt + extraBulk));
                 const autoEatG = Math.max(0, expectedStock - remG);
                 const finalEatG = (item.manualEatGram !== null && item.manualEatGram !== undefined && !isNaN(item.manualEatGram)) 
                                   ? parseFloat(item.manualEatGram) 
                                   : autoEatG;
                 const eatCostTk = (priceKg / 1000) * finalEatG;
-
                 const currentStockValuation = (priceKg / 1000) * remG;
+                const itemUsedCost = (priceKg / 1000) * totalUsedG;
 
                 grandStartG += startG;
                 grandUsedG += totalUsedG;
                 grandRemG += remG;
+                grandCostTk += itemUsedCost;
                 grandStockValuation += currentStockValuation;
                 grandEatCostTk += eatCostTk;
 
@@ -647,17 +677,54 @@
                 `;
             });
 
-            // মোট লাভের হিসাব বর্তমান হিসাব থেকে নেওয়া
-            const currentNetProfitText = document.getElementById('sum-grand-net-profit').textContent;
+            // সকল ব্যাচের মোট লাভের সমষ্টি (Cumulative Lifetime Profit) হিসাব
+            let cumulativeLifetimeProfit = 0;
+            let batchHtml = '';
+            
+            if (globalBatchesHistory.length > 0) {
+                document.getElementById('total-batch-count').textContent = `${globalBatchesHistory.length}টি ব্যাচ`;
+                globalBatchesHistory.forEach((batch, idx) => {
+                    cumulativeLifetimeProfit += batch.grandProfit;
+                    batchHtml += `
+                        <div class="bg-white p-2 rounded-lg border border-indigo-100 flex justify-between items-center text-[11px]">
+                            <div>
+                                <span class="font-bold text-indigo-900">ব্যাচ #${idx + 1} (${batch.packets} প্যাকেট)</span>
+                                <span class="text-gray-400 block text-[9px]">${batch.date.split('T')[0]}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="font-extrabold ${batch.grandProfit >= 0 ? 'text-emerald-700' : 'text-red-600'}">৳ ${batch.grandProfit.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                // যদি সার্ভার হিস্ট্রি না থাকে, রানিং ব্যাচ ধরবে
+                cumulativeLifetimeProfit = parseFloat(calculatedSummary.grandNetProfit) || 0;
+                document.getElementById('total-batch-count').textContent = `১টি ব্যাচ (রানিং)`;
+                batchHtml = `
+                    <div class="bg-white p-2 rounded-lg border border-indigo-100 flex justify-between items-center text-[11px]">
+                        <div>
+                            <span class="font-bold text-indigo-900">রানিং ব্যাচ (${calculatedSummary.packets} প্যাকেট)</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-extrabold ${cumulativeLifetimeProfit >= 0 ? 'text-emerald-700' : 'text-red-600'}">৳ ${cumulativeLifetimeProfit.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+            }
 
+            document.getElementById('batch-profits-container').innerHTML = batchHtml;
             document.getElementById('report-table-body').innerHTML = tableHtml;
             document.getElementById('rep-grand-start').textContent = `${grandStartG.toFixed(1)} g`;
             document.getElementById('rep-grand-used').textContent = `${grandUsedG.toFixed(1)} g`;
             document.getElementById('rep-grand-rem').textContent = `${grandRemG.toFixed(1)} g`;
-            document.getElementById('rep-grand-cost').textContent = document.getElementById('sum-items-cost').textContent;
+            document.getElementById('rep-grand-cost').textContent = `৳ ${grandCostTk.toFixed(2)}`;
             document.getElementById('rep-grand-eat').textContent = `৳ ${grandEatCostTk.toFixed(2)}`;
-            document.getElementById('rep-grand-net-profit').textContent = currentNetProfitText;
             
+            const netProfitElem = document.getElementById('rep-grand-net-profit');
+            netProfitElem.textContent = `৳ ${cumulativeLifetimeProfit.toFixed(2)}`;
+            netProfitElem.className = `font-extrabold text-sm ${cumulativeLifetimeProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
+
             const grandValElem = document.getElementById('grand-stock-valuation');
             if(grandValElem) {
                 grandValElem.textContent = `৳ ${grandStockValuation.toFixed(2)}`;
@@ -766,6 +833,13 @@
             document.getElementById('sum-bulk-profit').textContent = `৳ ${totalBulkProfit.toFixed(2)}`;
             document.getElementById('sum-eat-cost').textContent = `- ৳ ${totalPersonalEatCost.toFixed(2)}`;
             document.getElementById('sum-grand-net-profit').textContent = `৳ ${grandNetProfit.toFixed(2)}`;
+            
+            const batchParams = {
+                packets: document.getElementById('input-packets').value,
+                packaging: document.getElementById('input-packaging').value,
+                sellingPrice: document.getElementById('input-selling-price').value
+            };
+            localStorage.setItem('safabox_last_batch_params', JSON.stringify(batchParams));
         }
 
         function openMergeModal(index) {
@@ -949,7 +1023,7 @@
         function openHistoryModal() {
             document.getElementById('history-modal').classList.remove('hidden');
             const content = document.getElementById('history-content');
-            content.innerHTML = '<p class="text-center text-gray-500 py-4"><i class="fa-solid fa-spinner fa-spin mr-2"></i>সার্ভার থেকে হিস্ট্রি লোড হচ্ছে...</p>';
+            content.innerHTML = '<p class="text-center text-gray-500 py-4"><i class="fa-solid fa-spinner fa-spin mr-2"></i>সার্ভার থেকে হিস্ট্রি ও ব্যাচ লাভ লোড হচ্ছে...</p>';
 
             window.handleHistoryResponse = function(data) {
                 if (!data || data.length <= 1) {
@@ -988,7 +1062,7 @@
                                 <div>
                                     <span class="text-[11px] font-bold text-gray-600 block">📅 ${date}</span>
                                     <div class="text-xs font-bold text-gray-800 mt-0.5">
-                                        খরচ: <span class="text-red-600">৳ ${totalCost}</span> | নিট লাভ: <span class="text-emerald-600">৳ ${grandProfit}</span>
+                                        খরচ: <span class="text-red-600">৳ ${totalCost}</span> | ব্যাচ নিট লাভ: <span class="text-emerald-600 font-extrabold">৳ ${grandProfit}</span>
                                     </div>
                                 </div>
                                 <div class="text-right flex items-center space-x-1 space-x-reverse">
@@ -1002,7 +1076,7 @@
                                     <div>প্যাকেট প্রতি খরচ: <b>৳ ${costPerPkt}</b></div>
                                     <div>বিক্রি মূল্য: <b>৳ ${sellingPrice}</b></div>
                                     <div>লাভের হার: <b class="text-purple-700">${formattedMargin}</b></div>
-                                    <div>চুরান্ত নিট লাভ: <b class="text-emerald-700">৳ ${grandProfit}</b></div>
+                                    <div>ব্যাচের নিট লাভ: <b class="text-emerald-700 font-bold">৳ ${grandProfit}</b></div>
                                 </div>
                                 
                                 ${parsedItems.length > 0 ? `
@@ -1071,7 +1145,8 @@
         function resetToDefaults() {
             if (confirm('ডিফল্ট এক্সেল ডাটা রিসেট করতে চান?')) {
                 localStorage.removeItem('safabox_calculator_items');
-                loadStoredData();
+                localStorage.removeItem('safabox_last_batch_params');
+                location.reload();
             }
         }
     </script>
