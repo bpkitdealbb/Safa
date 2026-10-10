@@ -403,14 +403,23 @@
 
         function processAndRenderItems() {
             currentItems.forEach(item => {
-                if (item.remaining !== undefined && item.remaining !== null && item.remaining > 0) {
-                    item.startWeight = item.remaining;
-                    item.endWeight = item.remaining;
-                    item.stock = item.remaining;
-                    item.packetGram = 0;
+                // ১. শুরু ওজন (startWeight) সুরক্ষিত রাখা
+                if (item.startWeight === undefined || item.startWeight === null) {
+                    item.startWeight = item.stock || 1000;
                 }
-                if (item.startWeight === undefined) item.startWeight = item.stock || 1000;
-                if (item.endWeight === undefined) item.endWeight = item.remaining || item.stock || 1000;
+
+                // ২. অবশিষ্ট স্টক না থাকলে শুরুর স্টকের সমান ধরা হবে
+                if (item.remaining === undefined || item.remaining === null) {
+                    item.remaining = item.startWeight;
+                }
+
+                item.endWeight = item.remaining;
+
+                // ৩. প্যাকেটে ব্যবহৃত গ্রাম স্বয়ংক্রিয় হিসাব (শুরু - অবশিষ্ট)
+                const calcPkt = Math.max(0, item.startWeight - item.remaining);
+                if (item.packetGram === undefined || item.packetGram === null) {
+                    item.packetGram = calcPkt;
+                }
             });
 
             currentItems.forEach((_, idx) => openAccordionStates[idx] = idx === 0);
