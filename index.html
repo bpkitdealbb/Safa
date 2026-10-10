@@ -252,7 +252,7 @@
             </div>
 
             <div class="bg-purple-50 p-2.5 rounded-xl border border-purple-100 text-xs space-y-1">
-                <div class="flex justify-between"><span>মোট প্রিমিক্স ওজন:</span><b id="blend-total-gram" class="text-purple-900">0 গ্রাম</b></div>
+                <div class="flex justify-between"><span>মোট প্রিমিক্স ওজন:</span><b id="blend-total-gram" class="text-purple-900">0 g</b></div>
                 <div class="flex justify-between"><span>গড় প্রিমিক্স কেজি দর:</span><b id="blend-avg-price" class="text-purple-900">৳ 0.00/কেজি</b></div>
             </div>
 
@@ -309,6 +309,19 @@
         function loadStoredData() {
             const savedItems = localStorage.getItem('safabox_calculator_items');
             currentItems = savedItems ? JSON.parse(savedItems) : JSON.parse(JSON.stringify(defaultItems));
+            
+            // Auto-carry previous session's remaining weight as new startWeight
+            currentItems.forEach(item => {
+                if (item.remaining !== undefined && item.remaining !== null && item.remaining > 0) {
+                    item.startWeight = item.remaining;
+                    item.endWeight = item.remaining;
+                    item.stock = item.remaining;
+                    item.packetGram = 0;
+                }
+                if (item.startWeight === undefined) item.startWeight = item.stock || 1000;
+                if (item.endWeight === undefined) item.endWeight = item.remaining || item.stock || 1000;
+            });
+
             currentItems.forEach((_, idx) => openAccordionStates[idx] = idx === 0);
             renderItems();
             calculateAll();
@@ -335,7 +348,7 @@
                                     <span class="font-bold text-gray-800 text-sm">${item.name}</span>
                                     ${item.isMixed ? '<span class="bg-purple-100 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-purple-200"><i class="fa-solid fa-blender mr-0.5"></i>মিক্সড ব্লেন্ড</span>' : ''}
                                 </div>
-                                <span class="text-[11px] text-gray-500 block">অবশিষ্ট স্টক: <b class="text-amber-800">${item.remaining || 0}গ</b> • কেজি দর: ৳${item.price || 0}</span>
+                                <span class="text-[11px] text-gray-500 block">অবশিষ্ট স্টক: <b id="ui-rem-${index}" class="text-amber-800">${item.remaining || 0}g</b> • কেজি দর: ৳${item.price || 0}</span>
                             </div>
                         </div>
 
@@ -364,12 +377,12 @@
                             <b class="text-[11px] text-amber-900 block"><i class="fa-solid fa-calculator mr-1"></i>স্বয়ংক্রিয় ওজন থেকে ব্যবহার হিসাব:</b>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label class="block text-[10px] text-gray-600">প্যাকেট করার আগের ওজন (গ্রাম)</label>
-                                    <input type="number" value="${item.startWeight !== undefined && item.startWeight !== null ? item.startWeight : ''}" oninput="handleWeightInput(${index}, 'startWeight', this.value)" class="w-full bg-white border border-amber-300 text-xs rounded-md p-1.5 text-center font-bold text-gray-800" placeholder="1000">
+                                    <label class="block text-[10px] text-gray-600">প্যাকেট করার আগের ওজন (g)</label>
+                                    <input type="number" id="start-w-${index}" value="${item.startWeight !== undefined && item.startWeight !== null ? item.startWeight : ''}" oninput="handleWeightInput(${index}, 'startWeight', this.value)" class="w-full bg-white border border-amber-300 text-xs rounded-md p-1.5 text-center font-bold text-gray-800" placeholder="1000">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] text-gray-600">প্যাকেট করার পরের ওজন (গ্রাম)</label>
-                                    <input type="number" value="${item.endWeight !== undefined && item.endWeight !== null ? item.endWeight : ''}" oninput="handleWeightInput(${index}, 'endWeight', this.value)" class="w-full bg-white border border-amber-300 text-xs rounded-md p-1.5 text-center font-bold text-amber-900" placeholder="800">
+                                    <label class="block text-[10px] text-gray-600">প্যাকেট করার পরের ওজন (g)</label>
+                                    <input type="number" id="end-w-${index}" value="${item.endWeight !== undefined && item.endWeight !== null ? item.endWeight : ''}" oninput="handleWeightInput(${index}, 'endWeight', this.value)" class="w-full bg-white border border-amber-300 text-xs rounded-md p-1.5 text-center font-bold text-amber-900" placeholder="800">
                                 </div>
                             </div>
                         </div>
@@ -377,10 +390,10 @@
                         <div class="grid grid-cols-3 gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100">
                             <div>
                                 <label class="block text-[10px] text-emerald-800 font-bold">প্যাকেটে ব্যবহৃত (অটো)</label>
-                                <input type="number" value="${item.packetGram || 0}" readonly class="w-full bg-emerald-100/70 border border-emerald-300 text-xs rounded-md p-1 text-center font-extrabold text-emerald-900">
+                                <input type="number" id="pkt-used-${index}" value="${item.packetGram || 0}" readonly class="w-full bg-emerald-100/70 border border-emerald-300 text-xs rounded-md p-1 text-center font-extrabold text-emerald-900">
                             </div>
                             <div>
-                                <label class="block text-[10px] text-gray-500">বাল্ক বিক্রি (গ্রাম)</label>
+                                <label class="block text-[10px] text-gray-500">বাল্ক বিক্রি (g)</label>
                                 <input type="number" value="${item.bulkGram || ''}" oninput="updateItemField(${index}, 'bulkGram', this.value)" class="w-full bg-white border text-xs rounded-md p-1 text-center" placeholder="0">
                             </div>
                             <div>
@@ -391,8 +404,8 @@
 
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <label class="block text-[11px] text-gray-500">মেপে মেলা অবশিষ্টাংশ (গ্রাম)</label>
-                                <input type="number" value="${item.remaining !== undefined && item.remaining !== null ? item.remaining : ''}" oninput="updateItemField(${index}, 'remaining', this.value)" class="w-full bg-gray-50 border text-xs rounded-md p-1.5 text-center font-bold text-gray-800" placeholder="0">
+                                <label class="block text-[11px] text-gray-500">মেপে মেলা অবশিষ্টাংশ (g)</label>
+                                <input type="number" id="rem-w-${index}" value="${item.remaining !== undefined && item.remaining !== null ? item.remaining : ''}" oninput="updateItemField(${index}, 'remaining', this.value)" class="w-full bg-gray-50 border text-xs rounded-md p-1.5 text-center font-bold text-gray-800" placeholder="0">
                             </div>
                             <div>
                                 <label class="block text-[11px] text-gray-500">ম্যানুয়াল ঘাটতি (ইচ্ছাধীন)</label>
@@ -403,23 +416,23 @@
                         <div class="bg-emerald-50/80 p-2 rounded-lg text-xs space-y-1 border border-emerald-100">
                             <div class="flex justify-between">
                                 <span class="text-gray-600">হিসাব অনুযায়ী থাকার কথা:</span>
-                                <span id="expected-stock-${index}" class="font-bold text-gray-700">0 গ্রাম</span>
+                                <span id="expected-stock-${index}" class="font-bold text-gray-700">0 g</span>
                             </div>
                             <div class="flex justify-between border-t border-emerald-200/50 pt-1">
                                 <span class="text-gray-600">অটো ঘাটতি/খাওয়া (Difference):</span>
-                                <span id="auto-eat-${index}" class="font-bold text-rose-600">0 গ্রাম (৳ 0.00)</span>
+                                <span id="auto-eat-${index}" class="font-bold text-rose-600">0 g (৳ 0.00)</span>
                             </div>
                         </div>
                     </div>
                 `;
                 container.appendChild(card);
             });
+            calculateAll();
         }
 
         function toggleAccordion(index) {
             openAccordionStates[index] = !openAccordionStates[index];
             renderItems();
-            calculateAll();
         }
 
         function toggleAllAccordions() {
@@ -428,7 +441,6 @@
             const btn = document.getElementById('btn-toggle-all');
             btn.innerHTML = allExpanded ? '<i class="fa-solid fa-arrows-up-to-line"></i><span>সব গুটিয়ে নিন</span>' : '<i class="fa-solid fa-arrows-down-to-line"></i><span>সব খুলুন</span>';
             renderItems();
-            calculateAll();
         }
 
         function handleWeightInput(index, field, value) {
@@ -438,10 +450,21 @@
             const startW = parseFloat(currentItems[index].startWeight) || 0;
             const endW = parseFloat(currentItems[index].endWeight) || 0;
 
-            // Automatically calculate used packet grams from Before vs After weights
+            currentItems[index].stock = startW;
+
+            // Instant zero-lag calculation updates
             const calculatedPacketGram = Math.max(0, startW - endW);
             currentItems[index].packetGram = calculatedPacketGram;
             currentItems[index].remaining = endW;
+
+            // Instantly update DOM fields without re-rendering entire accordion
+            const pktUsedInput = document.getElementById(`pkt-used-${index}`);
+            const remInput = document.getElementById(`rem-w-${index}`);
+            const uiRem = document.getElementById(`ui-rem-${index}`);
+
+            if (pktUsedInput) pktUsedInput.value = calculatedPacketGram;
+            if (remInput) remInput.value = endW;
+            if (uiRem) uiRem.textContent = `${endW}g`;
 
             calculateAll();
             localStorage.setItem('safabox_calculator_items', JSON.stringify(currentItems));
@@ -453,6 +476,23 @@
             } else {
                 currentItems[index][field] = field === 'name' ? value : (parseFloat(value) || 0);
             }
+
+            // If remaining weight is manually updated, keep endWeight in sync instantly
+            if (field === 'remaining') {
+                const remVal = parseFloat(value) || 0;
+                currentItems[index].endWeight = remVal;
+                const endWInput = document.getElementById(`end-w-${index}`);
+                const uiRem = document.getElementById(`ui-rem-${index}`);
+                if (endWInput) endWInput.value = remVal;
+                if (uiRem) uiRem.textContent = `${remVal}g`;
+
+                const startW = parseFloat(currentItems[index].startWeight) || 0;
+                const calcPkt = Math.max(0, startW - remVal);
+                currentItems[index].packetGram = calcPkt;
+                const pktUsedInput = document.getElementById(`pkt-used-${index}`);
+                if (pktUsedInput) pktUsedInput.value = calcPkt;
+            }
+
             calculateAll();
             localStorage.setItem('safabox_calculator_items', JSON.stringify(currentItems));
         }
@@ -461,14 +501,12 @@
             currentItems.push({ name: 'নতুন আইটেম', price: 0, stock: 1000, startWeight: 1000, endWeight: 1000, packetGram: 0, bulkGram: 0, bulkPrice: 0, manualEatGram: null, remaining: 1000, isMixed: false });
             openAccordionStates[currentItems.length - 1] = true;
             renderItems();
-            calculateAll();
         }
 
         function removeItem(index) {
             if (confirm('মুছে ফেলতে চান?')) {
                 currentItems.splice(index, 1);
                 renderItems();
-                calculateAll();
             }
         }
 
@@ -481,7 +519,7 @@
 
             currentItems.forEach((item, index) => {
                 const pricePerKg = parseFloat(item.price) || 0;
-                const totalStock = parseFloat(item.stock) || 0;
+                const totalStock = parseFloat(item.stock) || parseFloat(item.startWeight) || 0;
                 const packetGram = parseFloat(item.packetGram) || 0;
                 const bulkGram = parseFloat(item.bulkGram) || 0;
                 const bulkPrice = parseFloat(item.bulkPrice) || 0;
@@ -504,9 +542,14 @@
                 const eatCost = (pricePerKg / 1000) * finalEatGrams;
                 totalPersonalEatCost += eatCost;
 
-                if(document.getElementById(`expected-stock-${index}`)) {
-                    document.getElementById(`expected-stock-${index}`).textContent = `${expectedStock.toFixed(1)} গ্রাম`;
-                    document.getElementById(`auto-eat-${index}`).textContent = `${finalEatGrams.toFixed(1)} গ্রাম (৳ ${eatCost.toFixed(2)})`;
+                const expectedElem = document.getElementById(`expected-stock-${index}`);
+                const autoEatElem = document.getElementById(`auto-eat-${index}`);
+
+                if(expectedElem) {
+                    expectedElem.textContent = `${expectedStock.toFixed(1)} g`;
+                }
+                if(autoEatElem) {
+                    autoEatElem.textContent = `${finalEatGrams.toFixed(1)} g (৳ ${eatCost.toFixed(2)})`;
                 }
             });
 
@@ -594,7 +637,6 @@
             currentItems[activeMergeIndex].remaining = totalGrams;
 
             renderItems();
-            calculateAll();
             saveData(false);
             closeMergeModal();
             showToastMsg('নতুন স্টক ও গড় দর সফলভাবে আপডেট করা হয়েছে!');
@@ -666,7 +708,7 @@
             const avgPricePerKg = totalGrams > 0 ? (totalCost / totalGrams) * 1000 : 0;
             currentBlendResult = { totalGrams, avgPricePerKg };
 
-            document.getElementById('blend-total-gram').textContent = `${totalGrams.toFixed(1)} গ্রাম`;
+            document.getElementById('blend-total-gram').textContent = `${totalGrams.toFixed(1)} g`;
             document.getElementById('blend-avg-price').textContent = `৳ ${avgPricePerKg.toFixed(2)}/কেজি`;
         }
 
@@ -702,7 +744,6 @@
 
             openAccordionStates[currentItems.length - 1] = true;
             renderItems();
-            calculateAll();
             saveData(false);
             closeBlendModal();
             showToastMsg('প্রিমিক্স সফলভাবে তৈরি হয়েছে এবং নতুন আইটেম হিসেবে স্টক যুক্ত হয়েছে!');
@@ -797,7 +838,7 @@
                                         <div class="space-y-1">
                                             ${parsedItems.map(item => {
                                                 const pricePerKg = parseFloat(item.price) || 0;
-                                                const totalStock = parseFloat(item.stock) || 0;
+                                                const totalStock = parseFloat(item.stock) || parseFloat(item.startWeight) || 0;
                                                 const packetGram = parseFloat(item.packetGram) || 0;
                                                 const bulkGram = parseFloat(item.bulkGram) || 0;
                                                 const remainingGram = parseFloat(item.remaining) || 0;
@@ -812,11 +853,11 @@
                                                             <span>৳ ${cost.toFixed(2)}</span>
                                                         </div>
                                                         <div class="text-[10px] text-gray-500 space-x-1 pl-2">
-                                                            <span>স্টক: ${totalStock}গ</span> |
-                                                            <span>প্যাকেটে: ${packetGram}গ</span> |
-                                                            ${bulkGram > 0 ? `<span class="text-blue-600">বাল্ক: ${bulkGram}গ</span> |` : ''}
-                                                            ${autoEat > 0 ? `<span class="text-rose-600">অটো ঘাটতি: ${autoEat.toFixed(1)}গ</span> |` : ''}
-                                                            <span>অবশিষ্ট: ${remainingGram}গ</span>
+                                                            <span>স্টক: ${totalStock}g</span> |
+                                                            <span>প্যাকেটে: ${packetGram}g</span> |
+                                                            ${bulkGram > 0 ? `<span class="text-blue-600">বাল্ক: ${bulkGram}g</span> |` : ''}
+                                                            ${autoEat > 0 ? `<span class="text-rose-600">অটো ঘাটতি: ${autoEat.toFixed(1)}g</span> |` : ''}
+                                                            <span>অবশিষ্ট: ${remainingGram}g</span>
                                                         </div>
                                                     </div>
                                                 `;
