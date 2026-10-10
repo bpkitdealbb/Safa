@@ -303,14 +303,40 @@
         let allExpanded = false;
 
         window.addEventListener('DOMContentLoaded', () => {
-            loadStoredData();
+            fetchServerLatestDataAndLoad();
         });
 
-        function loadStoredData() {
+        // Automatically fetch latest saved state from Google Sheet server on start
+        function fetchServerLatestDataAndLoad() {
             const savedItems = localStorage.getItem('safabox_calculator_items');
             currentItems = savedItems ? JSON.parse(savedItems) : JSON.parse(JSON.stringify(defaultItems));
             
-            // Auto-carry previous session's remaining weight as new startWeight
+            // Try fetching from server to sync latest inventory across devices/tabs
+            window.handleServerSyncResponse = function(data) {
+                if (data && data.length > 1) {
+                    const latestRow = data[data.length - 1];
+                    const rawItems = latestRow[7];
+                    try {
+                        const parsedServerItems = typeof rawItems === 'string' ? JSON.parse(rawItems) : rawItems;
+                        if (parsedServerItems && parsedServerItems.length > 0) {
+                            currentItems = parsedServerItems;
+                            localStorage.setItem('safabox_calculator_items', JSON.stringify(currentItems));
+                        }
+                    } catch(e) {}
+                }
+                processAndRenderItems();
+            };
+
+            const script = document.createElement('script');
+            script.src = `${SERVER_ENDPOINT}?callback=handleServerSyncResponse&t=${Date.now()}`;
+            script.onerror = function() {
+                // Fallback to local storage if offline or error
+                processAndRenderItems();
+            };
+            document.body.appendChild(script);
+        }
+
+        function processAndRenderItems() {
             currentItems.forEach(item => {
                 if (item.remaining !== undefined && item.remaining !== null && item.remaining > 0) {
                     item.startWeight = item.remaining;
@@ -452,12 +478,10 @@
 
             currentItems[index].stock = startW;
 
-            // Instant zero-lag calculation updates
             const calculatedPacketGram = Math.max(0, startW - endW);
             currentItems[index].packetGram = calculatedPacketGram;
             currentItems[index].remaining = endW;
 
-            // Instantly update DOM fields without re-rendering entire accordion
             const pktUsedInput = document.getElementById(`pkt-used-${index}`);
             const remInput = document.getElementById(`rem-w-${index}`);
             const uiRem = document.getElementById(`ui-rem-${index}`);
@@ -477,7 +501,6 @@
                 currentItems[index][field] = field === 'name' ? value : (parseFloat(value) || 0);
             }
 
-            // If remaining weight is manually updated, keep endWeight in sync instantly
             if (field === 'remaining') {
                 const remVal = parseFloat(value) || 0;
                 currentItems[index].endWeight = remVal;
