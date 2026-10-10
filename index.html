@@ -18,6 +18,7 @@
 </head>
 <body class="pb-24">
 
+    <!-- Header Section -->
     <header class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white sticky top-0 z-50 shadow-md">
         <div class="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-2 space-x-reverse">
@@ -186,6 +187,7 @@
 
     </main>
 
+    <!-- Bottom Action Floating Bar -->
     <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-2.5 shadow-lg z-40">
         <div class="max-w-2xl mx-auto flex gap-2">
             <button onclick="window.print()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center space-x-2 border border-gray-300 transition">
@@ -199,31 +201,25 @@
         </div>
     </div>
 
+    <!-- ONE-LOOK LIFETIME BUSINESS SUMMARY MODAL -->
     <div id="report-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-2.5 hidden">
         <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
             <div class="p-3.5 bg-gradient-to-r from-indigo-700 to-purple-800 text-white flex justify-between items-center">
                 <div>
                     <h3 class="font-bold text-sm flex items-center gap-1.5"><i class="fa-solid fa-chart-line text-amber-300"></i>বিজনেসের লাইফটাইম সামারি ও বর্তমান স্টক ভ্যালু</h3>
-                    <p class="text-[10px] text-indigo-100">প্রোডাক্টের বর্তমান স্টক মূল্য, খরচ, ব্যবহার ও সার্বমোট ভ্যালুয়েশন</p>
+                    <p class="text-[10px] text-indigo-100">প্রোডাক্টের বর্তমান স্টক মূল্য, খরচ, ব্যবহার, ঘাটতি ও সার্বমোট ভ্যালুয়েশন</p>
                 </div>
                 <button onclick="closeFullBusinessReport()" class="text-white hover:text-gray-200 text-xl font-bold">&times;</button>
             </div>
 
             <div class="p-3 overflow-y-auto flex-1 space-y-3 text-xs">
-                <!-- Highlight Card: Grand Total Live Stock Monetary Value -->
-                <div class="bg-emerald-600 text-white p-3.5 rounded-xl shadow-md flex items-center justify-between border border-emerald-500">
-                    <div class="flex items-center space-x-3">
-                        <div class="p-2.5 bg-emerald-800 text-amber-300 rounded-xl shadow-inner">
-                            <i class="fa-solid fa-warehouse text-2xl"></i>
-                        </div>
-                        <div>
-                            <span class="text-xs font-semibold text-emerald-100 block">সর্বমোট বর্তমানে স্টকে থাকা পণ্যের বাজার মূল্য</span>
-                            <span class="text-[10px] text-emerald-200">(বর্তমান অবশিষ্ট স্টক × কেজি দর)</span>
-                        </div>
+                <!-- Stock Total Valuation Banner -->
+                <div class="bg-gradient-to-r from-emerald-700 to-teal-800 text-white p-3.5 rounded-xl shadow-md flex justify-between items-center">
+                    <div>
+                        <span class="text-[11px] text-emerald-200 font-semibold block">সর্বমোট বর্তমানে স্টকে থাকা পণ্যের বাজার মূল্য</span>
+                        <span class="text-[10px] text-emerald-100">(বর্তমান অবশিষ্ট স্টক × কেজি দর)</span>
                     </div>
-                    <div class="text-right">
-                        <span id="rep-grand-rem-value" class="text-2xl font-extrabold text-amber-300 block">৳ 0.00</span>
-                    </div>
+                    <span id="grand-stock-valuation" class="text-xl font-extrabold text-amber-300">৳ 0.00</span>
                 </div>
 
                 <!-- Summary Table -->
@@ -236,8 +232,8 @@
                                 <th class="p-2 text-center">কেজি দর (৳)</th>
                                 <th class="p-2 text-center">মোট ব্যবহার (g)</th>
                                 <th class="p-2 text-center">অবশিষ্ট স্টক (g)</th>
-                                <th class="p-2 text-right">ব্যবহৃত খরচ (৳)</th>
-                                <th class="p-2 text-right bg-emerald-100/70 text-emerald-900">অবশিষ্ট স্টকের মূল্য (৳)</th>
+                                <th class="p-2 text-center">ঘাটতি/খাওয়া (g & ৳)</th>
+                                <th class="p-2 text-right">অবশিষ্ট স্টকের মূল্য (৳)</th>
                             </tr>
                         </thead>
                         <tbody id="report-table-body" class="divide-y divide-gray-100 text-gray-700"></tbody>
@@ -245,16 +241,18 @@
                 </div>
 
                 <!-- Grand Summary Cards -->
-                <div class="bg-gradient-to-r from-gray-800 to-indigo-900 text-white p-3.5 rounded-xl space-y-2 shadow">
+                <div class="bg-gradient-to-r from-gray-800 to-indigo-900 text-white p-3.5 rounded-xl space-y-2.5 shadow">
                     <h4 class="font-bold text-amber-400 border-b border-indigo-700/50 pb-1 flex justify-between">
-                        <span>সার্বমোট বিজনেসের গ্র্যান্ড লেজার সামারি</span>
+                        <span>সার্বমোট বিজনেসের গ্র্যান্ড লেজার সামারি ও লাভ</span>
                         <i class="fa-solid fa-coins"></i>
                     </h4>
                     <div class="grid grid-cols-2 gap-2 text-[11px]">
                         <div>শুরুতে মোট আইটেম স্টক: <b id="rep-grand-start" class="text-emerald-300">0 g</b></div>
                         <div>বিজনেসে মোট ব্যবহার/বিক্রি: <b id="rep-grand-used" class="text-blue-300">0 g</b></div>
-                        <div>সার্বমোট ব্যবহৃত কাঁচামাল খরচ: <b id="rep-grand-cost" class="text-rose-300">৳ 0.00</b></div>
+                        <div>সর্বমোট কাঁচামাল খরচ: <b id="rep-grand-cost" class="text-rose-300">৳ 0.00</b></div>
+                        <div>সর্বমোট ঘাটতি/খাওয়া খরচ: <b id="rep-grand-eat" class="text-orange-300">৳ 0.00</b></div>
                         <div>বর্তমান লাইভ অবশিষ্টাংশ: <b id="rep-grand-rem" class="text-amber-300">0 g</b></div>
+                        <div>লাইফটাইম নিট লাভ (Net Profit): <b id="rep-grand-net-profit" class="text-emerald-400">৳ 0.00</b></div>
                     </div>
                 </div>
             </div>
@@ -267,6 +265,7 @@
         </div>
     </div>
 
+    <!-- Stock Merge Modal -->
     <div id="merge-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 hidden">
         <div class="bg-white rounded-2xl w-full max-w-sm p-4 shadow-2xl space-y-3">
             <div class="flex justify-between items-center border-b pb-2">
@@ -298,6 +297,7 @@
         </div>
     </div>
 
+    <!-- Multi-Item Blend / Premix Modal -->
     <div id="blend-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 hidden">
         <div class="bg-white rounded-2xl w-full max-w-md p-4 shadow-2xl space-y-3 max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center border-b pb-2">
@@ -330,6 +330,7 @@
         </div>
     </div>
 
+    <!-- Interactive History Modal -->
     <div id="history-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 hidden">
         <div class="bg-white rounded-2xl w-full max-w-lg max-h-[85vh] flex flex-col shadow-2xl">
             <div class="p-3.5 bg-emerald-700 text-white rounded-t-2xl flex justify-between items-center">
@@ -590,13 +591,17 @@
             let grandUsedG = 0;
             let grandRemG = 0;
             let grandCostTk = 0;
-            let grandRemValueTk = 0;
+            let grandStockValuation = 0;
+            let grandEatCostTk = 0;
 
-            currentItems.forEach(item => {
+            currentItems.forEach((item, index) => {
                 const startG = parseFloat(item.startWeight) || parseFloat(item.stock) || 0;
                 const priceKg = parseFloat(item.price) || 0;
-                const remG = parseFloat(item.remaining) !== undefined && !isNaN(item.remaining) ? parseFloat(item.remaining) : startG;
+                const remG = (item.remaining !== undefined && item.remaining !== null && !isNaN(item.remaining)) 
+                             ? parseFloat(item.remaining) 
+                             : startG;
 
+                // মোট ব্যবহার হিসাব
                 let totalUsedG = Math.max(0, startG - remG);
                 const extraPkt = parseFloat(item.packetGram) || 0;
                 const extraBulk = parseFloat(item.bulkGram) || 0;
@@ -604,34 +609,50 @@
                     totalUsedG = Math.max(totalUsedG, extraPkt + extraBulk);
                 }
 
-                const totalCost = (priceKg / 1000) * totalUsedG;
-                const remStockValue = (priceKg / 1000) * remG;
+                // ঘাটতি বা খাওয়া হিসাব
+                const expectedStock = Math.max(0, startG - (extraPkt + extraBulk));
+                const autoEatG = Math.max(0, expectedStock - remG);
+                const finalEatG = (item.manualEatGram !== null && item.manualEatGram !== undefined && !isNaN(item.manualEatGram)) 
+                                  ? parseFloat(item.manualEatGram) 
+                                  : autoEatG;
+                const eatCostTk = (priceKg / 1000) * finalEatG;
+
+                const currentStockValuation = (priceKg / 1000) * remG;
 
                 grandStartG += startG;
                 grandUsedG += totalUsedG;
                 grandRemG += remG;
-                grandCostTk += totalCost;
-                grandRemValueTk += remStockValue;
+                grandStockValuation += currentStockValuation;
+                grandEatCostTk += eatCostTk;
 
                 tableHtml += `
-                    <tr class="hover:bg-gray-50 transition border-b border-gray-100">
+                    <tr class="hover:bg-gray-50 transition">
                         <td class="p-2 font-bold text-gray-800">${item.name} ${item.isMixed ? '<span class="text-[9px] bg-purple-100 text-purple-800 font-bold px-1 rounded">মিক্সড</span>' : ''}</td>
                         <td class="p-2 text-center font-semibold text-gray-700">${startG}g</td>
                         <td class="p-2 text-center text-gray-600">৳${priceKg}</td>
                         <td class="p-2 text-center font-bold text-blue-700">${totalUsedG.toFixed(1)}g</td>
                         <td class="p-2 text-center font-bold text-amber-700">${remG}g</td>
-                        <td class="p-2 text-right font-semibold text-rose-700">৳ ${totalCost.toFixed(2)}</td>
-                        <td class="p-2 text-right font-extrabold text-emerald-700 bg-emerald-50/50">৳ ${remStockValue.toFixed(2)}</td>
+                        <td class="p-2 text-center font-semibold text-rose-600">${finalEatG.toFixed(1)}g <br><span class="text-[10px]">(৳${eatCostTk.toFixed(2)})</span></td>
+                        <td class="p-2 text-right font-extrabold text-emerald-700">৳ ${currentStockValuation.toFixed(2)}</td>
                     </tr>
                 `;
             });
+
+            // মোট লাভের হিসাব বর্তমান হিসাব থেকে নেওয়া
+            const currentNetProfitText = document.getElementById('sum-grand-net-profit').textContent;
 
             document.getElementById('report-table-body').innerHTML = tableHtml;
             document.getElementById('rep-grand-start').textContent = `${grandStartG.toFixed(1)} g`;
             document.getElementById('rep-grand-used').textContent = `${grandUsedG.toFixed(1)} g`;
             document.getElementById('rep-grand-rem').textContent = `${grandRemG.toFixed(1)} g`;
-            document.getElementById('rep-grand-cost').textContent = `৳ ${grandCostTk.toFixed(2)}`;
-            document.getElementById('rep-grand-rem-value').textContent = `৳ ${grandRemValueTk.toFixed(2)}`;
+            document.getElementById('rep-grand-cost').textContent = document.getElementById('sum-items-cost').textContent;
+            document.getElementById('rep-grand-eat').textContent = `৳ ${grandEatCostTk.toFixed(2)}`;
+            document.getElementById('rep-grand-net-profit').textContent = currentNetProfitText;
+            
+            const grandValElem = document.getElementById('grand-stock-valuation');
+            if(grandValElem) {
+                grandValElem.textContent = `৳ ${grandStockValuation.toFixed(2)}`;
+            }
 
             document.getElementById('report-modal').classList.remove('hidden');
         }
@@ -1041,7 +1062,7 @@
         function resetToDefaults() {
             if (confirm('ডিফল্ট এক্সেল ডাটা রিসেট করতে চান?')) {
                 localStorage.removeItem('safabox_calculator_items');
-                fetchServerLatestDataAndLoad();
+                loadStoredData();
             }
         }
     </script>
