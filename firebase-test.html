@@ -55,7 +55,6 @@
 </div>
 
 <script type="module">
-// ======================= আপনার Firebase কনফিগ বসানো হয়েছে =======================
 const firebaseConfig = {
   apiKey: "AIzaSyC2bmAtHLQNt1nobq8y-yyDaYAsNWIEKgc",
   authDomain: "demomixfood.firebaseapp.com",
@@ -64,7 +63,6 @@ const firebaseConfig = {
   messagingSenderId: "905891531269",
   appId: "1:905891531269:web:fe640a761c23f7377aea6c"
 };
-// ===============================================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
@@ -76,14 +74,8 @@ import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager
 const $ = id => document.getElementById(id);
 const showErr = m => { $('err').textContent = m || ''; };
 
-if (firebaseConfig.apiKey === "YOUR_API_KEY") {
-  showErr("আগে ফাইলের ভেতরে firebaseConfig বসান (গাইডের ধাপ ৪)।");
-  throw new Error("config missing");
-}
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-// অফলাইন ক্যাশ চালু: নেট ছাড়াও সেভ ও দেখা যাবে
 const db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
 
 let unsub = null, uid = null;
@@ -92,11 +84,12 @@ window.doLogin = async () => {
   showErr('');
   try { await signInWithPopup(auth, new GoogleAuthProvider()); }
   catch (e) {
-    if (e.code === 'auth/unauthorized-domain') showErr("এই ওয়েবসাইটের ঠিকানা Firebase-এ অনুমোদিত নয়।\nAuthentication > Settings > Authorized domains এ ঠিকানা যোগ করুন।\n(ফাইল সরাসরি ফোনে খুললে চলবে না, ওয়েবসাইট হিসেবে খুলতে হবে)");
-    else if (e.code === 'auth/operation-not-allowed') showErr("Google সাইন-ইন চালু করা হয়নি (Authentication > Sign-in method)।");
+    if (e.code === 'auth/unauthorized-domain') showErr("এই ওয়েবসাইটের ঠিকানা Firebase-এ অনুমোদিত নয়।\nAuthentication > Settings > Authorized domains এ ঠিকানা যোগ করুন।");
+    else if (e.code === 'auth/operation-not-allowed') showErr("Google সাইন-ইন চালু করা হয়নি।");
     else if (e.code !== 'auth/popup-closed-by-user') showErr(e.code + ': ' + e.message);
   }
 };
+
 window.doLogout = () => signOut(auth);
 
 onAuthStateChanged(auth, user => {
@@ -112,7 +105,7 @@ onAuthStateChanged(auth, user => {
   $('uEmail').textContent = user.email \vert{}\vert{} '';$('uUid').textContent = user.uid;
   $('loggedOut').style.display = 'none';$('loggedIn').style.display = '';
   $('dataBox').style.display = '';$('listBox').style.display = '';
-  // শুধু নিজের ডাটা: users/{uid}/transactions
+
   const q = query(collection(db, 'users', uid, 'transactions'), orderBy('ts', 'desc'));
   unsub = onSnapshot(q, snap => {
     if (snap.empty) { $('list').textContent = 'এখনো কিছু নেই'; return; }
@@ -129,7 +122,7 @@ onAuthStateChanged(auth, user => {
       del.onclick = () => deleteDoc(doc(db, 'users', uid, 'transactions', d.id));
       row.append(left, del); $('list').appendChild(row);
     });
-  }, e => showErr('ডাটা পড়া যায়নি: ' + e.code + '\n(সিকিউরিটি রুলস ধাপ ৫ ঠিকমতো বসানো হয়েছে কি?)'));
+  }, e => showErr('ডাটা পড়া যায়নি: ' + e.code));
 });
 
 window.addTx = async () => {
@@ -138,9 +131,8 @@ window.addTx = async () => {
   if (!item || !(grams > 0) || !(price >= 0)) { showErr('আইটেম, গ্রাম ও দর ঠিকমতো লিখুন'); return; }
   const id = 't_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   try {
-    // নেট না থাকলে এই কল পরে সার্ভারে যায়, তাই await করে আটকে থাকি না
     setDoc(doc(db, 'users', uid, 'transactions', id), { item, grams, price, ts: Date.now() })
-      .catch(e => showErr('সেভ হয়নি: ' + e.code + '\n(সিকিউরিটি রুলস দেখুন)'));
+      .catch(e => showErr('সেভ হয়নি: ' + e.code));
     $('item').value = ''; $('grams').value = '';$('price').value = '';
   } catch (e) { showErr(e.code + ': ' + e.message); }
 };
