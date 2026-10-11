@@ -100,11 +100,15 @@ onAuthStateChanged(auth, user => {
     $('dataBox').style.display = 'none';$('listBox').style.display = 'none';
     return;
   }
-  uid = user.uid;
+    uid = user.uid;
   $('uName').textContent = user.displayName || '';
-  $('uEmail').textContent = user.email \vert{}\vert{} '';$('uUid').textContent = user.uid;
-  $('loggedOut').style.display = 'none';$('loggedIn').style.display = '';
-  $('dataBox').style.display = '';$('listBox').style.display = '';
+  $('uEmail').textContent = user.email || '';
+  $('uUid').textContent = user.uid;
+  
+  $('loggedOut').style.display = 'none';
+  $('loggedIn').style.display = '';
+  $('dataBox').style.display = '';
+  $('listBox').style.display = '';
 
   const q = query(collection(db, 'users', uid, 'transactions'), orderBy('ts', 'desc'));
   unsub = onSnapshot(q, snap => {
