@@ -196,7 +196,14 @@ function costNow(it, g) {
 // ===PURE-END===
 
 // ---------- সেটআপ ও ডাটা ----------
-const FIREBASE_CONFIG = { apiKey: "", authDomain: "", projectId: "", storageBucket: "", messagingSenderId: "", appId: "" };   // বিক্রির ভার্সনে এখানে নিজের Firebase কনফিগ বসান (এগুলো গোপন নয়); ফাঁকা থাকলে অ্যাপ নিজেই পেস্ট করতে বলবে
+const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyC2bmAtHLQNt1nobq8y-yyDaYAsNWIEKgc",
+    authDomain: "demomixfood.firebaseapp.com",
+    projectId: "demomixfood",
+    storageBucket: "demomixfood.firebasestorage.app",
+    messagingSenderId: "905891531269",
+    appId: "1:905891531269:web:fe640a761c23f7377aea6c"
+};   // Firebase ওয়েব কনফিগ গোপন নয়; ডাটা সুরক্ষিত থাকে Firestore সিকিউরিটি রুলস দিয়ে
 const DEMO = /[?&]demo=1\b/.test(location.search);   // ?demo=1 দিলে ডেমো মোড: লগইন ছাড়া, আলাদা স্টোরেজ, নমুনা ডাটা
 let LS_KEY = DEMO ? 'safabox_demo_ledger_v2' : 'safabox_cloud_v3_anon';
 let LS_DRAFT = DEMO ? 'safabox_demo_draft_v2' : 'safabox_cloud_draft_v3_anon';
