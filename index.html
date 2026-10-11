@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafaBoxBD - লাইফটাইম ইনভেন্টরি লেজার</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <style>
-        body { font-family: 'Hind Siliguri', sans-serif; background-color: #f3f4f6; }
+        body { font-family: 'Hind Siliguri', system-ui, sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
+        button, a, select, input { touch-action: manipulation; }
+        button:active { transform: scale(.97); transition: transform .08s; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
         @media print { .no-print { display: none !important; } body { background: #fff; } }
@@ -198,7 +203,7 @@ function loadDb() {
 }
 let db = loadDb();
 let state = compute(db.txs, db.batches);
-let ui = { tab: 'home', ledgerTab: 'batches', stockSort: 'cost', expanded: {}, openBatch: {}, txItem: '', txType: '', txLimit: 60, bfOpen: {} };
+let ui = { tab: 'home', ledgerTab: 'batches', stockSort: 'cost', expanded: {}, openBatch: {}, txItem: '', txType: '', txLimit: 60, bfOpen: {}, eatRange: 'all' };
 
 function persist() { try { localStorage.setItem(LS_KEY, JSON.stringify(db)); } catch (e) {} }
 function recompute() { state = compute(db.txs, db.batches); }
@@ -269,6 +274,7 @@ function viewHome() {
         ${statCard('fa-box', 'amber', 'ব্যবহার (প্যাকেট+বাল্ক)', tk(T.pktCost + T.bulkCost))}
     </div>
 
+    ${eatLossBox()}
     <div class="grid grid-cols-6 gap-1.5 mb-3 no-print">
         ${qa('fa-box-open', 'emerald', 'নতুন ব্যাচ', "goTab('batch')")}
         ${qa('fa-cart-plus', 'sky', 'রিস্টক', 'openRestock()')}
@@ -430,7 +436,11 @@ function toggleItem(idx) { const n = state.items[idx].name; ui.expanded[n] = !ui
 
 // ---------- ব্যাচ (২ ধাপ: শুরুর ওজন → শেষের ওজন) ----------
 let bf = (function () { try { const d = JSON.parse(localStorage.getItem(LS_DRAFT)); if (d && d.rows && d.v === 2) return d; } catch (e) {} return { v: 2, packets: '', packaging: '', sell: '', sold: '', other: '', note: '', rows: {} }; })();
-function saveDraft() { try { localStorage.setItem(LS_DRAFT, JSON.stringify(bf)); } catch (e) {} }
+let draftTimer = null;
+function flushDraft() { clearTimeout(draftTimer); draftTimer = null; try { localStorage.setItem(LS_DRAFT, JSON.stringify(bf)); } catch (e) {} }
+function saveDraft() { clearTimeout(draftTimer); draftTimer = setTimeout(flushDraft, 400); }
+window.addEventListener('pagehide', () => { if (draftTimer) flushDraft(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && draftTimer) flushDraft(); });
 function bfReset() { bf = { v: 2, packets: '', packaging: '', sell: '', sold: '', other: '', note: '', rows: {} }; saveDraft(); }
 const EPS = 0.01;
 function batchPreview() { if (db.running) ffPreview(); else sfPreview(); }
@@ -716,6 +726,31 @@ function reconBox() {
         <div class="flex justify-between"><span class="font-bold text-indigo-900">ব্যাচগুলোর মোট নিট লাভ</span><b class="${profitCls(sum)}">${tk(sum)}</b></div>
         <div class="flex justify-between"><span class="text-indigo-900">ব্যাচের বাইরের লাভ/ক্ষতি (বাল্ক − খাওয়া − খরচ)</span><b class="${profitCls(other)}">${tk(other)}</b></div>
         <div class="flex justify-between border-t border-indigo-200 pt-1"><span class="font-bold text-indigo-900">লাইফটাইম নিট লাভ (হোমের সমান)</span><b class="${profitCls(T.profit)}">${tk(T.profit)}</b></div></div>`;
+}
+function eatLossBox() {
+    const now = new Date(), r = ui.eatRange;
+    const from = r === 'month' ? new Date(now.getFullYear(), now.getMonth(), 1).getTime() : 0;
+    const by = {};
+    db.txs.forEach(t => {
+        if (t.type !== 'EAT' || num(t.ts) < from) return;
+        const o = by[t.item] || (by[t.item] = { name: t.item, eatG: 0, eatC: 0, shG: 0, shC: 0 });
+        const c = state.costOf[t.id] || 0, g = num(t.grams);
+        if (t.note && String(t.note).indexOf('অটো ঘাটতি') === 0) { o.shG += g; o.shC += c; } else { o.eatG += g; o.eatC += c; }
+    });
+    const rows = Object.values(by).sort((a, b) => (b.eatC + b.shC) - (a.eatC + a.shC));
+    const tab = (k, l) => `<button onclick="ui.eatRange='${k}';render()" class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${r === k ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-rose-700 border-rose-200'}">${l}</button>`;
+    const tot = rows.reduce((a, o) => ({ g: a.g + o.eatG + o.shG, c: a.c + o.eatC + o.shC, eg: a.eg + o.eatG, ec: a.ec + o.eatC, sg: a.sg + o.shG, sc: a.sc + o.shC }), { g: 0, c: 0, eg: 0, ec: 0, sg: 0, sc: 0 });
+    return `<div class="bg-white p-3 rounded-xl border border-rose-200 shadow-sm mb-3">
+        <div class="flex items-center justify-between mb-2"><span class="text-xs font-bold text-rose-800"><i class="fa-solid fa-utensils mr-1"></i>আইটেম অনুযায়ী খাওয়া/ঘাটতি</span><span class="flex gap-1">${tab('month', 'এই মাস')}${tab('all', 'সব সময়')}</span></div>
+        ${rows.length ? `<div class="text-[11px]">
+            <div class="grid grid-cols-12 gap-1 font-bold text-gray-500 border-b pb-1"><span class="col-span-4">আইটেম</span><span class="col-span-4 text-right">খাওয়া</span><span class="col-span-4 text-right">ঘাটতি</span></div>
+            ${rows.map(o => `<div class="grid grid-cols-12 gap-1 py-1 border-b border-dashed border-gray-100 items-start">
+                <span class="col-span-4 font-semibold text-gray-800">${esc(o.name)}<span class="block text-[10px] text-rose-700">${fg(o.eatG + o.shG)} • ${tk(o.eatC + o.shC)}</span></span>
+                <span class="col-span-4 text-right">${o.eatG > 0 ? fg(o.eatG) + '<span class="block text-gray-500">' + tk(o.eatC) + '</span>' : '<span class="text-gray-300">-</span>'}</span>
+                <span class="col-span-4 text-right">${o.shG > 0 ? fg(o.shG) + '<span class="block text-gray-500">' + tk(o.shC) + '</span>' : '<span class="text-gray-300">-</span>'}</span></div>`).join('')}
+            <div class="grid grid-cols-12 gap-1 pt-1.5 font-extrabold text-rose-700"><span class="col-span-4">মোট ${fg(tot.g)}<span class="block">${tk(tot.c)}</span></span><span class="col-span-4 text-right">${fg(tot.eg)}<span class="block">${tk(tot.ec)}</span></span><span class="col-span-4 text-right">${fg(tot.sg)}<span class="block">${tk(tot.sc)}</span></span></div>
+        </div>` : '<p class="text-[11px] text-gray-500 text-center py-2">এই সময়ে কোনো খাওয়া/ঘাটতি নেই।</p>'}
+    </div>`;
 }
 function viewBatchList() {
     if (!state.batches.length) return '<p class="text-center text-gray-500 text-sm py-6">এখনো কোনো ব্যাচ সেভ হয়নি।</p>' + reconBox();
@@ -1025,6 +1060,10 @@ function scheduleSync() { clearTimeout(syncTimer); syncTimer = setTimeout(() => 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 function normTx(r) { return { id: String(r.id), ts: num(r.ts), date: String(r.date || ''), type: String(r.type || ''), item: String(r.item || ''), grams: num(r.grams), pricePerKg: num(r.pricePerKg), amountTk: num(r.amountTk), ref: String(r.ref || ''), note: String(r.note || '') }; }
 function normBatch(r) { return { id: String(r.id), ts: num(r.ts), date: String(r.date || ''), packets: num(r.packets), packagingCost: num(r.packagingCost), sellingPrice: num(r.sellingPrice), soldPackets: (r.soldPackets === '' || r.soldPackets == null) ? undefined : num(r.soldPackets), note: String(r.note || '') }; }
+function batchSame(a, b) {
+    const eq = k => Math.abs(num(a[k]) - num(b[k])) < 1e-6;
+    return eq('packets') && eq('packagingCost') && eq('sellingPrice') && (b.soldPackets === undefined || eq('soldPackets')) && String(a.note || '') === String(b.note || '');
+}
 function mergeServer(data) {
     if (data && data.ok === false && data.message === 'unauthorized') { toast('সিকিউরিটি কী ভুল বা দেওয়া হয়নি (হোমের টুলস দেখুন)'); throw new Error('unauthorized'); }
     if (!data || data.ok !== true || !Array.isArray(data.transactions)) throw new Error('bad response');
@@ -1037,24 +1076,25 @@ function mergeServer(data) {
     const txs = [], bs = [];
     sTx.forEach(t => { if (!pd.has(t.id)) txs.push(Object.assign(t, { synced: true })); });
     db.txs.forEach(t => { if (!t.synced && !sIds.has(t.id)) txs.push(t); });
-    sB.forEach(b => { if (pdb.has(b.id)) return; const old = db.batches.find(x => x.id === b.id); if (old && !old.synced) { bs.push(old); return; } bs.push(Object.assign(b, { synced: true }, old && old.snap ? { snap: old.snap } : {})); });
+    sB.forEach(b => { if (pdb.has(b.id)) return; const old = db.batches.find(x => x.id === b.id); if (old && !old.synced && !batchSame(old, b)) { bs.push(old); return; } bs.push(Object.assign(b, { synced: true }, old && old.snap ? { snap: old.snap } : {})); });
     db.batches.forEach(b => { if (!b.synced && !sbIds.has(b.id)) bs.push(b); });
     db.txs = txs; db.batches = bs;
     if ('running' in data) {
         const sr = data.running || null;
         if (db.runningDirty) { if ((sr && sr.id) === (db.running && db.running.id)) db.runningDirty = false; }
         else db.running = sr;
-    }
+    } else if (db.runningDirty) { db.runningDirty = false; } // পুরোনো Apps Script: চলমান ব্যাচ সার্ভারে রাখার সুবিধা নেই
 }
-function pull() {
+function pull(force) {
     return new Promise(resolve => {
         const cb = 'sbx_cb_' + Date.now();
         const s = document.createElement('script');
         const done = ok => { clearTimeout(timer); delete window[cb]; s.remove(); resolve(ok); };
         const timer = setTimeout(() => done(false), 20000);
-        window[cb] = data => { try { mergeServer(data); done(true); } catch (e) { console.error(e); if (Array.isArray(data)) toast('Apps Script কোড নতুন ভার্সনে আপডেট করুন'); done(false); } };
+        window[cb] = data => { try { if (data && data.same === true) { done(true); return; } mergeServer(data); if (data && data.ver) { try { localStorage.setItem('sbx_ver', String(data.ver)); } catch (x) {} } done(true); } catch (e) { console.error(e); if (Array.isArray(data)) toast('Apps Script কোড নতুন ভার্সনে আপডেট করুন'); done(false); } };
         s.onerror = () => done(false);
-        s.src = `${endpoint()}?callback=${cb}&key=${encodeURIComponent(getKey())}&t=${Date.now()}`;
+        let lv = ''; try { lv = force ? '' : (localStorage.getItem('sbx_ver') || ''); } catch (x) {}
+        s.src = `${endpoint()}?callback=${cb}&key=${encodeURIComponent(getKey())}${lv ? '&ver=' + lv : ''}&t=${Date.now()}`;
         document.body.appendChild(s);
     });
 }
@@ -1062,15 +1102,16 @@ async function pushPending() {
     const strip = o => { const c = Object.assign({}, o); delete c.synced; return c; };
     const body = { action: 'sync', key: getKey(), addTx: db.txs.filter(t => !t.synced).map(strip), addBatches: db.batches.filter(b => !b.synced).map(strip), deleteTx: db.pendingDeleteTx.slice(), deleteBatches: db.pendingDeleteBatch.slice() };
     if (db.runningDirty) body.running = db.running;
-    await fetch(endpoint(), { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
-    await sleep(2000);
+    const ac = new AbortController(), to = setTimeout(() => ac.abort(), 30000);
+    try { await fetch(endpoint(), { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body), signal: ac.signal }); }
+    finally { clearTimeout(to); }
 }
 async function syncNow(manual) {
     if (syncing) { syncAgain = true; return; }
     syncing = true; updateBadge();
     const before = sig();
     let ok = false;
-    try { if (pendingCount() > 0) await pushPending(); ok = await pull(); } catch (e) { ok = false; }
+    try { const force = manual || pendingCount() > 0; if (pendingCount() > 0) await pushPending(); ok = await pull(force); if (!ok) { await sleep(1500); ok = await pull(true); } } catch (e) { ok = false; }
     syncing = false; lastSyncOk = ok;
     persist(); recompute();
     if (sig() !== before) render(); else updateBadge();
@@ -1083,16 +1124,17 @@ function setKey() {
 }
 function setEndpoint() {
     const v = prompt('Apps Script Web App URL (/exec দিয়ে শেষ):', endpoint());
-    if (v && v.trim()) { localStorage.setItem('sbx_endpoint', v.trim()); toast('URL সেভ হয়েছে'); syncNow(true); }
+    if (v && v.trim()) { localStorage.setItem('sbx_endpoint', v.trim()); try { localStorage.removeItem('sbx_ver'); } catch (x) {} toast('URL সেভ হয়েছে'); syncNow(true); }
 }
 function clearLocal() {
     if (db.running && !confirm('একটি ব্যাচ চলছে। ক্যাশ মুছলে চলমান ব্যাচের তথ্য হারাবে। তবু মুছবেন?')) return;
     if (pendingCount() > 0 && !confirm('সার্ভারে যায়নি এমন ' + pendingCount() + 'টি এন্ট্রি আছে, মুছলে সেগুলো হারাবে। তবু মুছবেন?')) return;
     if (!pendingCount() && !confirm('লোকাল ক্যাশ মুছে সার্ভার থেকে নতুন করে লোড করবেন?')) return;
-    localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_DRAFT); location.reload();
+    clearTimeout(draftTimer); draftTimer = null; localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_DRAFT); location.reload();
 }
 
 window.addEventListener('online', () => scheduleSync());
+if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 window.addEventListener('DOMContentLoaded', () => { render(); syncNow(false); });
 </script>
 </body>
